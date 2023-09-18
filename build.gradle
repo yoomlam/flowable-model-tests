@@ -1,0 +1,65 @@
+plugins {
+    // Enable Kotlin
+    id 'org.jetbrains.kotlin.jvm' version '1.9.10'
+
+    // Provides Spring annotations for classes to be open and accessible to the Spring framework so that Kotlin can create proxy objects
+    // https://www.oreilly.com/library/view/kotlin-for-enterprise/9781788997270/8b4ec0ea-4715-429a-95ea-8c4895ba9695.xhtml
+    // https://kotlinlang.org/docs/all-open-plugin.html#spring-support
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.10'
+
+    // Enable Spring
+    // https://docs.spring.io/spring-boot/docs/2.7.15/gradle-plugin/reference/htmlsingle/#getting-started
+    id 'org.springframework.boot' version '2.7.15'
+
+    // Kotlin Linter
+    id "org.jlleitschuh.gradle.ktlint" version "11.5.1"
+
+    // Provides Gradle tasks 'tiOrder' and 'tiTree'
+    id 'org.barfuin.gradle.taskinfo' version '2.1.0'
+}
+
+// Enables omitting version numbers for Spring dependencies
+// https://docs.spring.io/spring-boot/docs/2.7.15/gradle-plugin/reference/htmlsingle/#managing-dependencies
+apply plugin: 'io.spring.dependency-management'
+
+repositories {
+    mavenCentral()
+}
+
+// group = ''
+// version = '0.1.1-SNAPSHOT'
+
+kotlin {
+    // Use LTS versions only
+    jvmToolchain(17)
+}
+
+test {
+    // Enable JUnit
+    useJUnitPlatform()
+    // https://docs.gradle.org/current/userguide/java_testing.html
+    testLogging {
+        // In addition to failed tests, also log tests that pass or are skipped (@Ignore or @Disabled)
+        events "passed", "skipped"
+        // Be verbose for exceptions
+        exceptionFormat "full"
+    }
+}
+dependencies {
+    // Kotlin logging
+    implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
+    implementation 'ch.qos.logback:logback-classic'
+
+    // Spring
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.flowable:flowable-spring-boot-starter-process:6.8.0'
+
+    // DB for Flowable engine
+    implementation 'com.h2database:h2'
+
+    // Provides @SpringBootTest
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    // Provides Kotlin annotations and assert utility functions for tests, independent of the test framework
+    // https://kotlinlang.org/api/latest/kotlin.test/#kotlintest
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+}
