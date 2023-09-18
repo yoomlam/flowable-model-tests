@@ -5,6 +5,6 @@ Tests for Flowable BPMN, DMN, CMMN models
 
 ```sh
 ./gradlew build
-./gradlew test
+./gradlew test --rerun-tasks
 ./gradlew bootRun
 ```

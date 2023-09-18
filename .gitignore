@@ -27,3 +27,6 @@ gradle-app.setting
 *.ipr
 /out/
 eclipse
+
+# MacOS
+.DS_Store

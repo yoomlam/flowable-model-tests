@@ -1,4 +1,4 @@
-package com.navapbc.flowable.tests
+package flowable.tests
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
