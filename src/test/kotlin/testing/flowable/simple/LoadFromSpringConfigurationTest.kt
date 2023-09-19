@@ -11,6 +11,7 @@ import org.flowable.engine.test.FlowableTestHelper
 import org.flowable.spring.impl.test.FlowableSpringExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import testing.flowable.simple.service.MyApiClient
 
 // https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-spring/src/test/java/org/flowable/spring/test/jupiter/SpringJunitJupiterTest.java
 @ExtendWith(FlowableSpringExtension::class)
@@ -27,18 +29,23 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 class LoadFromSpringConfigurationTest {
 
     // Create TestConfiguration specifically for this test class
+    // Demonstrates different ways to overrides beans originally defined in SimpleTestConfiguration
     @TestConfiguration
     class MySpecificConfig {
-        // Overrides 'someService' bean originally defined in SimpleTestConfiguration
+        // Overrides 'someService' bean referenced directly by serviceTask1 in simpleProcess-serviceCall.bpmn
         @Bean
         fun someService(): MockService = spy(MockService("in ${this::class.simpleName}"))
 
-        // TODO: investigate: flowableTestHelper.mockSupport.setAllServiceTasksNoOp()
-        // TODO: investigate: mockSupport.mockServiceTaskByIdWithClassDelegate("serviceTask1", MockServiceTask::class.java)
+        // Overrides 'someApiClient' used by 'someService' bean for serviceTask2 in simpleProcess-serviceCall.bpmn
+        @Bean
+        fun someApiClient(): MyApiClient = mock(MyApiClient::class.java)
     }
 
     @Autowired
     lateinit var someService: MockService
+
+    @Autowired
+    lateinit var someApiClient: MyApiClient
 
     @Autowired
     lateinit var processEngine: ProcessEngine
@@ -86,8 +93,10 @@ class LoadFromSpringConfigurationTest {
         // Since it's a UserTask, it must be manually completed
         taskService.complete(task.id)
 
-        // Verify that a method on the MockService 'someService' is called
+        // Verify that a method on the MockService 'someService' is called (for serviceTask1)
         verify(someService).logMessage("Hello")
+        // Verify that a method on the SomeApiClient is called (for serviceTask2)
+        verify(someApiClient).callApiEndpoint()
 
         // Process instance is now completed
         assertThat(runtimeService.createProcessInstanceQuery().list()).isEmpty()

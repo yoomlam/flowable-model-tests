@@ -14,6 +14,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.jdbc.datasource.SimpleDriverDataSource
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import testing.flowable.simple.service.SimpleService
+import testing.flowable.simple.service.MyApiClient
 import java.time.Instant
 import javax.sql.DataSource
 
@@ -22,7 +23,12 @@ import javax.sql.DataSource
 @EnableTransactionManagement
 class SimpleConfiguration {
     @Bean
-    fun someService() = SimpleService("in SimpleTestConfiguration")
+    fun someService(apiClient: MyApiClient) = SimpleService(MyApiClient("for someService1"))
+
+    @Bean
+    fun someApiClient() = MyApiClient("for someService2")
+    @Bean
+    fun someService2(apiClient: MyApiClient) = SimpleService(apiClient)
 
     @Bean
     fun dataSource(): DataSource = SimpleDriverDataSource().apply {
