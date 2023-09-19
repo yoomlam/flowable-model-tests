@@ -1,4 +1,4 @@
-package flowable.tests
+package testing.flowable
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

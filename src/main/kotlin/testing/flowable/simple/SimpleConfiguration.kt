@@ -1,4 +1,4 @@
-package flowable.tests
+package testing.flowable.simple
 
 import org.flowable.engine.HistoryService
 import org.flowable.engine.ManagementService
@@ -8,18 +8,19 @@ import org.flowable.engine.RuntimeService
 import org.flowable.engine.TaskService
 import org.flowable.spring.ProcessEngineFactoryBean
 import org.flowable.spring.SpringProcessEngineConfiguration
-import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.jdbc.datasource.SimpleDriverDataSource
 import org.springframework.transaction.annotation.EnableTransactionManagement
+import testing.flowable.simple.service.SimpleService
 import java.time.Instant
 import javax.sql.DataSource
 
 // Refer to https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-spring/src/test/java/org/flowable/spring/test/jupiter/SpringJunitJupiterTest.java#L104
-@TestConfiguration(proxyBeanMethods = false)
+@Configuration(proxyBeanMethods = false)
 @EnableTransactionManagement
-class SimpleTestConfiguration {
+class SimpleConfiguration {
     @Bean
     fun someService() = SimpleService("in SimpleTestConfiguration")
 

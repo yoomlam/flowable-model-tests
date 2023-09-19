@@ -1,4 +1,4 @@
-package flowable.tests
+package testing.flowable.simple
 
 import org.assertj.core.api.Assertions.assertThat
 import org.flowable.engine.ProcessEngine
@@ -23,7 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(FlowableSpringExtension::class)
 @ExtendWith(SpringExtension::class)
 // Use only the listed Configuration classes; a subsequent Configuration overrides prior Configuration elements
-@ContextConfiguration(classes = [SimpleTestConfiguration::class, LoadFromSpringConfigurationTest.MySpecificConfig::class])
+@ContextConfiguration(classes = [SimpleConfiguration::class, LoadFromSpringConfigurationTest.MySpecificConfig::class])
 class LoadFromSpringConfigurationTest {
 
     // Create TestConfiguration specifically for this test class
@@ -53,7 +53,7 @@ class LoadFromSpringConfigurationTest {
     lateinit var repositoryService: RepositoryService
 
     @Test
-    @Deployment(resources = ["processes/simpleProcess-mocking.bpmn"])
+    @Deployment(resources = ["processes/simpleProcess-serviceCall.bpmn"])
     fun simpleProcessTest(
         flowableTestHelper: FlowableTestHelper,
         @DeploymentId deploymentId: String

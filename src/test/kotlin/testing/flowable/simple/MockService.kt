@@ -1,4 +1,4 @@
-package flowable.tests
+package testing.flowable.simple
 
 // Open the class and method so tests can spy on it
 open class MockService(private val initMessage: String = "default") {

@@ -1,4 +1,4 @@
-package flowable.tests
+package testing.flowable.simple.service
 
 class SimpleService(private val initMessage: String) {
     private val log = mu.KotlinLogging.logger {}

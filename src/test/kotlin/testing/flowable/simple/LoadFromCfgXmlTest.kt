@@ -1,4 +1,4 @@
-package flowable.tests
+package testing.flowable.simple
 
 import org.assertj.core.api.Assertions.assertThat
 import org.flowable.engine.ProcessEngine
