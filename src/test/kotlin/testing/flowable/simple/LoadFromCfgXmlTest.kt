@@ -58,6 +58,8 @@ class LoadFromCfgXmlTest {
         // Since it's a UserTask, it must be manually completed
         taskService.complete(task.id)
 
+        // All tasks are complete, so there are no active tasks
+        assertThat(taskService.createTaskQuery().list()).isEmpty()
         // Process instance is now completed
         assertThat(runtimeService.createProcessInstanceQuery().list()).isEmpty()
     }

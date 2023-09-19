@@ -6,7 +6,7 @@ private val log = mu.KotlinLogging.logger {}
 
 @Mockable
 class MyApiClient(private val initMessage: String) {
-    fun callApiEndpoint(){
+    fun callApiEndpoint() {
         log.info { "SomeApiClient ($initMessage)" }
     }
 }

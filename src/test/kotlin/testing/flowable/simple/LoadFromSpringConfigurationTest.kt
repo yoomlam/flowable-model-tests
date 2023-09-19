@@ -1,6 +1,7 @@
 package testing.flowable.simple
 
 import org.assertj.core.api.Assertions.assertThat
+import org.flowable.engine.HistoryService
 import org.flowable.engine.ProcessEngine
 import org.flowable.engine.RepositoryService
 import org.flowable.engine.RuntimeService
@@ -9,7 +10,6 @@ import org.flowable.engine.test.Deployment
 import org.flowable.engine.test.DeploymentId
 import org.flowable.engine.test.FlowableTestHelper
 import org.flowable.spring.impl.test.FlowableSpringExtension
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.mock
@@ -57,8 +57,8 @@ class LoadFromSpringConfigurationTest {
     lateinit var apiClient2: MyApiClient
 
     @BeforeTest
-    fun setup(){
-        `when`(apiClient2.callApiEndpoint()).thenCallRealMethod();
+    fun setup() {
+        `when`(apiClient2.callApiEndpoint()).thenCallRealMethod()
     }
 
     @Autowired
@@ -72,6 +72,9 @@ class LoadFromSpringConfigurationTest {
 
     @Autowired
     lateinit var repositoryService: RepositoryService
+
+    @Autowired
+    lateinit var historyService: HistoryService
 
     @Test
     @Deployment(resources = ["processes/simpleProcess-serviceCall.bpmn"])
@@ -94,11 +97,18 @@ class LoadFromSpringConfigurationTest {
             .isSameAs(processEngine)
 
         // Create and start process instance
-        val processVariables: Map<String, Any> = mapOf()
-        runtimeService.startProcessInstanceByKey("simpleProcess-mocking", processVariables)
+        val processVariables: Map<String, Any> = mapOf(
+            "processVar" to "Bye"
+        )
+        runtimeService.startProcessInstanceByKey("simpleProcess-serviceCall-springDemo", processVariables)
 
         // Process instance is created and is waiting for completion
         assertThat(runtimeService.createProcessInstanceQuery().list()).isNotEmpty()
+
+        // Check process variables
+        val vars = historyService.createHistoricVariableInstanceQuery().list()
+        assertThat(vars.size).isEqualTo(1)
+        assertThat(vars.find { it.variableName == "processVar" }!!.value).isEqualTo("Bye")
 
         // Get the single active task in the process
         val task = taskService.createTaskQuery().singleResult()
@@ -112,7 +122,27 @@ class LoadFromSpringConfigurationTest {
         // Verify that a method on the SomeApiClient is called (for serviceTask2)
         verify(apiClient2).callApiEndpoint()
 
+        // All tasks are complete, so there are no active tasks
+        assertThat(taskService.createTaskQuery().list()).isEmpty()
         // Process instance is now completed
         assertThat(runtimeService.createProcessInstanceQuery().list()).isEmpty()
+
+        // Check history
+        assertThat(historyService.createHistoricProcessInstanceQuery().count()).isEqualTo(1)
+
+        // Apparently this only returns UserTasks?
+        val tasks = historyService.createHistoricTaskInstanceQuery().orderByHistoricTaskInstanceStartTime().asc().list()
+        println("tasks: $tasks")
+        assertThat(tasks.size).isEqualTo(1)
+
+        // Activities have tasks and sequenceFlows that were executed
+        val activities = historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
+        assertThat(activities.find { it.activityId == "start" }).isNotNull
+        assertThat(activities.find { it.activityId == "theEnd" }).isNotNull
+        assertThat(activities.find { it.activityId == "flow1" }).isNotNull
+        assertThat(activities.find { it.activityId == "firstUserTask" }).isNotNull
+        assertThat(activities.find { it.activityId == "flow2" }).isNotNull
+        assertThat(activities.find { it.activityId == "serviceTask1" }).isNotNull
+        assertThat(activities.find { it.activityId == "serviceTask2" }).isNotNull
     }
 }

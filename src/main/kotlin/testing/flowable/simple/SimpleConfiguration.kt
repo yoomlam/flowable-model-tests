@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.jdbc.datasource.SimpleDriverDataSource
 import org.springframework.transaction.annotation.EnableTransactionManagement
-import testing.flowable.simple.service.SimpleService
 import testing.flowable.simple.service.MyApiClient
+import testing.flowable.simple.service.SimpleService
 import java.time.Instant
 import javax.sql.DataSource
 
@@ -27,6 +27,7 @@ class SimpleConfiguration {
 
     @Bean
     fun apiClient2() = MyApiClient("for someService2")
+
     @Bean
     fun someService2(apiClient: MyApiClient) = SimpleService(apiClient)
 
