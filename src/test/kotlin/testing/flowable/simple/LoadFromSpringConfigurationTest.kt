@@ -1,5 +1,8 @@
 package testing.flowable.simple
 
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import org.assertj.core.api.Assertions.assertThat
 import org.flowable.engine.HistoryService
 import org.flowable.engine.ProcessEngine
@@ -12,6 +15,7 @@ import org.flowable.engine.test.FlowableTestHelper
 import org.flowable.spring.impl.test.FlowableSpringExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -56,9 +60,24 @@ class LoadFromSpringConfigurationTest {
     @Autowired
     lateinit var apiClient2: MyApiClient
 
+    companion object {
+        // Refer to https://wiremock.org/docs/junit-jupiter/#advanced-usage---programmatic
+        @RegisterExtension
+        @JvmStatic
+        val mockApi: WireMockExtension = WireMockExtension.newInstance()
+            .failOnUnmatchedRequests(true)
+            .options(wireMockConfig().port(3000))
+            .build()
+    }
+
     @BeforeTest
     fun setup() {
         `when`(apiClient2.callApiEndpoint()).thenCallRealMethod()
+
+        mockApi.stubFor(
+            WireMock.post("/api/notifications")
+                .willReturn(WireMock.badRequest())
+        )
     }
 
     @Autowired
@@ -82,6 +101,10 @@ class LoadFromSpringConfigurationTest {
         flowableTestHelper: FlowableTestHelper,
         @DeploymentId deploymentId: String
     ) {
+        // Check WireMock
+        assertThat(mockApi.runtimeInfo.httpPort).isEqualTo(3000)
+        assertThat(mockApi.runtimeInfo.httpBaseUrl).isEqualTo("http://localhost:3000")
+
         // Check deployment
         assertThat(flowableTestHelper.deploymentIdFromDeploymentAnnotation)
             .isEqualTo(deploymentId)
@@ -144,5 +167,6 @@ class LoadFromSpringConfigurationTest {
         assertThat(activities.find { it.activityId == "flow2" }).isNotNull
         assertThat(activities.find { it.activityId == "serviceTask1" }).isNotNull
         assertThat(activities.find { it.activityId == "serviceTask2" }).isNotNull
+        assertThat(activities.find { it.activityId == "httpServiceTask" }).isNotNull
     }
 }

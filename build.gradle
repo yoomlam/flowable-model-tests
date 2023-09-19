@@ -8,8 +8,8 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.10'
 
     // Enable Spring
-    // https://docs.spring.io/spring-boot/docs/2.7.15/gradle-plugin/reference/htmlsingle/#getting-started
-    id 'org.springframework.boot' version '2.7.15'
+    // https://docs.spring.io/spring-boot/docs/3.1.3/gradle-plugin/reference/htmlsingle/#getting-started
+    id 'org.springframework.boot' version '3.1.3'
 
     // Kotlin Linter
     id "org.jlleitschuh.gradle.ktlint" version "11.5.1"
@@ -19,7 +19,7 @@ plugins {
 }
 
 // Enables omitting version numbers for Spring dependencies
-// https://docs.spring.io/spring-boot/docs/2.7.15/gradle-plugin/reference/htmlsingle/#managing-dependencies
+// https://docs.spring.io/spring-boot/docs/3.1.3/gradle-plugin/reference/htmlsingle/#managing-dependencies
 apply plugin: 'io.spring.dependency-management'
 
 repositories {
@@ -28,7 +28,9 @@ repositories {
 
 // group = ''
 // version = '0.1.1-SNAPSHOT'
-
+ext {
+    flowable_ver = '6.8.0'
+}
 kotlin {
     // Use LTS versions only
     jvmToolchain(17)
@@ -58,7 +60,11 @@ dependencies {
 
     // Spring
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.flowable:flowable-spring-boot-starter-process:6.8.0'
+
+    // Flowable
+    implementation "org.flowable:flowable-spring-boot-starter-process:${flowable_ver}"
+    // Needed for ServiceTasks with flowable:type="http"
+    implementation "org.flowable:flowable-http:${flowable_ver}"
 
     // DB for Flowable engine
     implementation 'com.h2database:h2'
@@ -68,4 +74,7 @@ dependencies {
     // Provides Kotlin annotations and assert utility functions for tests, independent of the test framework
     // https://kotlinlang.org/api/latest/kotlin.test/#kotlintest
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+
+    // Provides a mock server(s) to respond to API calls
+    testImplementation 'org.wiremock:wiremock:3.1.0'
 }

@@ -53,7 +53,7 @@ class SimpleConfiguration {
         }
 
     @Bean
-    fun processEngine(processEngineConfiguration: SpringProcessEngineConfiguration) =
+    fun processEngineFactory(processEngineConfiguration: SpringProcessEngineConfiguration) =
         ProcessEngineFactoryBean().apply {
             this.processEngineConfiguration = processEngineConfiguration
         }
