@@ -1,11 +1,12 @@
 package flowable.tests
 
-class MockService(private val initMessage: String) {
+// Open the class and method so tests can spy on it
+open class MockService(private val initMessage: String = "default") {
     private val log = mu.KotlinLogging.logger {}
     init {
         log.info { "Creating MockService: $initMessage" }
     }
-    fun logMessage(message: String) {
+    open fun logMessage(message: String) {
         log.info { "MockService ($initMessage): $message" }
     }
 }

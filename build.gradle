@@ -45,6 +45,7 @@ test {
         exceptionFormat "full"
     }
 }
+
 dependencies {
     // Kotlin logging
     implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
