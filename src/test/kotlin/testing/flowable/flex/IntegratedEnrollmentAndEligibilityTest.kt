@@ -1,4 +1,4 @@
-package testing.flowable.simple
+package testing.flowable.flex
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
@@ -6,27 +6,19 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import org.assertj.core.api.Assertions.assertThat
 import org.flowable.engine.HistoryService
 import org.flowable.engine.ProcessEngine
-import org.flowable.engine.RepositoryService
 import org.flowable.engine.RuntimeService
 import org.flowable.engine.TaskService
 import org.flowable.engine.test.Deployment
-import org.flowable.engine.test.DeploymentId
-import org.flowable.engine.test.FlowableTestHelper
 import org.flowable.spring.impl.test.FlowableSpringExtension
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.RegisterExtension
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import testing.flowable.FlowableConfiguration
-import testing.flowable.simple.service.MyApiClient
+import testing.flowable.simple.SimpleConfiguration
 import kotlin.test.BeforeTest
 
 // This is provided to demonstrate loading a Process Engine configuration from a Spring Configuration.
@@ -39,33 +31,15 @@ import kotlin.test.BeforeTest
     classes = [
         FlowableConfiguration::class,
         SimpleConfiguration::class,
-        LoadFromSpringConfigurationTest.MySpecificConfig::class
+        IntegratedEnrollmentAndEligibilityTest.MySpecificConfig::class
     ]
 )
-class LoadFromSpringConfigurationTest {
+class IntegratedEnrollmentAndEligibilityTest {
 
     // Create TestConfiguration specifically for this test class
     // Demonstrates different ways to overrides beans originally defined in SimpleTestConfiguration
     @TestConfiguration
-    class MySpecificConfig {
-        // Overrides 'someService' bean referenced directly by serviceTask1 in simpleProcess-serviceCall.bpmn
-        @Bean
-        fun someService(): TestService = spy(TestService("in ${this::class.simpleName}"))
-
-        // Overrides underlying 'apiClient2' used by 'someService2' bean for serviceTask2 in simpleProcess-serviceCall.bpmn
-        @Bean
-        fun apiClient2(): MyApiClient = mock(MyApiClient::class.java)
-
-        // Flowable provides a Mocks class but it hasn't been needed since the above are sufficient.
-        // https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-engine/src/main/java/org/flowable/engine/test/mock/Mocks.java
-        // https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-engine/src/test/java/org/flowable/standalone/testing/MockSupportWithFlowableJupiterTest.java
-    }
-
-    @Autowired
-    lateinit var someService: TestService
-
-    @Autowired
-    lateinit var apiClient2: MyApiClient
+    class MySpecificConfig
 
     companion object {
         // Refer to https://wiremock.org/docs/junit-jupiter/#advanced-usage---programmatic
@@ -75,15 +49,26 @@ class LoadFromSpringConfigurationTest {
             .failOnUnmatchedRequests(true)
             .options(wireMockConfig().port(3000))
             .build()
+
+        const val applicationId = 1234
     }
 
     @BeforeTest
     fun setup() {
-        `when`(apiClient2.callApiEndpoint()).thenCallRealMethod()
-
+        mockApi.stubFor(
+            WireMock.post("/api/applications/$applicationId/notifications")
+                .willReturn(WireMock.badRequest())
+        )
+        mockApi.stubFor(
+            WireMock.post("/api/eligibility")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withBody("{ \"eligible\": true}")
+                )
+        )
         mockApi.stubFor(
             WireMock.post("/api/notifications")
-                .willReturn(WireMock.unauthorized())
+                .willReturn(WireMock.badRequest())
         )
     }
 
@@ -97,60 +82,34 @@ class LoadFromSpringConfigurationTest {
     lateinit var taskService: TaskService
 
     @Autowired
-    lateinit var repositoryService: RepositoryService
-
-    @Autowired
     lateinit var historyService: HistoryService
 
     @Test
-    @Deployment(resources = ["processes/simpleProcess-serviceCall.bpmn"])
-    fun simpleProcessTest(
-        flowableTestHelper: FlowableTestHelper,
-        @DeploymentId deploymentId: String
-    ) {
+    @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
+    fun simpleProcessTest() {
         // Check WireMock
         assertThat(mockApi.runtimeInfo.httpPort).isEqualTo(3000)
         assertThat(mockApi.runtimeInfo.httpBaseUrl).isEqualTo("http://localhost:3000")
 
-        // Check deployment
-        assertThat(flowableTestHelper.deploymentIdFromDeploymentAnnotation)
-            .isEqualTo(deploymentId)
-            .isNotNull()
-
-        val deployedProcessDefinition = repositoryService.createProcessDefinitionQuery().deploymentId(deploymentId).singleResult()
-        assertThat(deployedProcessDefinition).isNotNull()
-
-        // Check process engine
-        assertThat(processEngine.name).isEqualTo("default")
-        assertThat(flowableTestHelper.processEngine)
-            .`as`("Spring injected process engine")
-            .isSameAs(processEngine)
-
         // Create and start process instance
         val processVariables: Map<String, Any> = mapOf(
-            "processVar" to "Bye"
+            "applicationIncome" to 2000,
+            "applicationId" to applicationId
         )
-        runtimeService.startProcessInstanceByKey("simpleProcess-serviceCall-springDemo", processVariables)
+        runtimeService.startProcessInstanceByKey("integratedEnrollmentAndEligibilityDemo", processVariables)
 
         // Process instance is created and is waiting for completion
         assertThat(runtimeService.createProcessInstanceQuery().list()).isNotEmpty()
 
-        // Check process variables
-        val vars = historyService.createHistoricVariableInstanceQuery().list()
-        assertThat(vars.size).isEqualTo(1)
-        assertThat(vars.find { it.variableName == "processVar" }!!.value).isEqualTo("Bye")
-
         // Get the single active task in the process
-        val task = taskService.createTaskQuery().singleResult()
-        assertThat(task.name).isEqualTo("First UserTask")
-
+        val verifyIncomeTask = taskService.createTaskQuery().taskName("Verifies income").singleResult()
         // Since it's a UserTask, it must be manually completed
-        taskService.complete(task.id)
+        taskService.complete(verifyIncomeTask.id)
 
-        // Verify that a method on the TestService 'someService' is called (for serviceTask1)
-        verify(someService).logMessage("Hello")
-        // Verify that a method on the SomeApiClient is called (for serviceTask2)
-        verify(apiClient2).callApiEndpoint()
+//        // Verify that a method on the TestService 'someService' is called (for serviceTask1)
+//        verify(someService).logMessage("Hello")
+//        // Verify that a method on the SomeApiClient is called (for serviceTask2)
+//        verify(apiClient2).callApiEndpoint()
 
         // All tasks are complete, so there are no active tasks
         assertThat(taskService.createTaskQuery().list()).isEmpty()
@@ -168,13 +127,16 @@ class LoadFromSpringConfigurationTest {
         // Activities have tasks and sequenceFlows that were executed
         val activities = historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
         val activityIds = activities.map { it.activityId }
+        println(activityIds)
         assertThat(activityIds).containsSequence(
-            "start",
-            "flow1", "firstUserTask",
-            "flow2", "serviceTask1",
-            "flow3", "serviceTask2",
-            "flow4", "httpServiceTask",
-            "flow5", "theEnd"
+            "applicationSubmitted",
+            "bpmnSequenceFlow_2", "splitOnProgramType",
+            "bpmnSequenceFlow_6", "checksEligibility",
+            "bpmnSequenceFlow_8", "bpmnGateway_7",
+            "bpmnSequenceFlow_9", "verifiesIncome",
+            "bpmnSequenceFlow_11", "bpmnGateway_8",
+            "bpmnSequenceFlow_14", "sendDenialNotification",
+            "bpmnSequenceFlow_5", "applicationProcessed"
         )
     }
 }
