@@ -45,6 +45,11 @@ test {
         exceptionFormat "full"
     }
 }
+allOpen {
+    // Enables mocking of classes
+    // https://medium.com/21buttons-tech/mocking-kotlin-classes-with-mockito-the-fast-way-631824edd5ba
+    annotation('testing.flowable.Mockable')
+}
 
 dependencies {
     // Kotlin logging
