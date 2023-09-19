@@ -3,12 +3,12 @@ package testing.flowable.simple
 import testing.flowable.Mockable
 
 @Mockable
-class MockService(private val initMessage: String = "default") {
+class TestService(private val initMessage: String = "default") {
     private val log = mu.KotlinLogging.logger {}
     init {
-        log.info { "Creating MockService: $initMessage" }
+        log.info { "Creating TestService: $initMessage" }
     }
     fun logMessage(message: String) {
-        log.info { "MockService ($initMessage): $message" }
+        log.info { "TestService ($initMessage): $message" }
     }
 }

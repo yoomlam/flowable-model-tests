@@ -12,7 +12,9 @@ import org.flowable.engine.test.FlowableTest
 import org.flowable.engine.test.FlowableTestHelper
 import org.junit.jupiter.api.Test
 
+// This is provided to demonstrate loading a Process Engine configuration from an xml file.
 // Refer to https://www.flowable.com/open-source/docs/bpmn/ch04-API/#unit-testing
+// However, all other tests loads the configuration using Spring (e.g., LoadFromSpringConfigurationTest).
 @FlowableTest
 @ConfigurationResource("processEngine.cfg.xml")
 class LoadFromCfgXmlTest {

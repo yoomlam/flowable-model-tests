@@ -5,8 +5,8 @@ import testing.flowable.Mockable
 private val log = mu.KotlinLogging.logger {}
 
 @Mockable
-open class MyApiClient(private val initMessage: String) {
-    open fun callApiEndpoint(){
+class MyApiClient(private val initMessage: String) {
+    fun callApiEndpoint(){
         log.info { "SomeApiClient ($initMessage)" }
     }
 }

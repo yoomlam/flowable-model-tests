@@ -9,19 +9,24 @@ import org.flowable.engine.test.Deployment
 import org.flowable.engine.test.DeploymentId
 import org.flowable.engine.test.FlowableTestHelper
 import org.flowable.spring.impl.test.FlowableSpringExtension
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import testing.flowable.simple.service.MyApiClient
+import kotlin.test.BeforeTest
 
-// https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-spring/src/test/java/org/flowable/spring/test/jupiter/SpringJunitJupiterTest.java
+// This is provided to demonstrate loading a Process Engine configuration from a Spring Configuration.
+// This is preferred (over LoadFromCfgXmlTest) due to type-checking and autocompletion provided by IDEs.
+// Based on https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-spring/src/test/java/org/flowable/spring/test/jupiter/SpringJunitJupiterTest.java
 @ExtendWith(FlowableSpringExtension::class)
 @ExtendWith(SpringExtension::class)
 // Use only the listed Configuration classes; a subsequent Configuration overrides prior Configuration elements
@@ -34,18 +39,27 @@ class LoadFromSpringConfigurationTest {
     class MySpecificConfig {
         // Overrides 'someService' bean referenced directly by serviceTask1 in simpleProcess-serviceCall.bpmn
         @Bean
-        fun someService(): MockService = spy(MockService("in ${this::class.simpleName}"))
+        fun someService(): TestService = spy(TestService("in ${this::class.simpleName}"))
 
-        // Overrides 'someApiClient' used by 'someService' bean for serviceTask2 in simpleProcess-serviceCall.bpmn
+        // Overrides underlying 'apiClient2' used by 'someService2' bean for serviceTask2 in simpleProcess-serviceCall.bpmn
         @Bean
-        fun someApiClient(): MyApiClient = mock(MyApiClient::class.java)
+        fun apiClient2(): MyApiClient = mock(MyApiClient::class.java)
+
+        // Flowable provides a Mocks class but it hasn't been needed since the above are sufficient.
+        // https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-engine/src/main/java/org/flowable/engine/test/mock/Mocks.java
+        // https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-engine/src/test/java/org/flowable/standalone/testing/MockSupportWithFlowableJupiterTest.java
     }
 
     @Autowired
-    lateinit var someService: MockService
+    lateinit var someService: TestService
 
     @Autowired
-    lateinit var someApiClient: MyApiClient
+    lateinit var apiClient2: MyApiClient
+
+    @BeforeTest
+    fun setup(){
+        `when`(apiClient2.callApiEndpoint()).thenCallRealMethod();
+    }
 
     @Autowired
     lateinit var processEngine: ProcessEngine
@@ -93,10 +107,10 @@ class LoadFromSpringConfigurationTest {
         // Since it's a UserTask, it must be manually completed
         taskService.complete(task.id)
 
-        // Verify that a method on the MockService 'someService' is called (for serviceTask1)
+        // Verify that a method on the TestService 'someService' is called (for serviceTask1)
         verify(someService).logMessage("Hello")
         // Verify that a method on the SomeApiClient is called (for serviceTask2)
-        verify(someApiClient).callApiEndpoint()
+        verify(apiClient2).callApiEndpoint()
 
         // Process instance is now completed
         assertThat(runtimeService.createProcessInstanceQuery().list()).isEmpty()

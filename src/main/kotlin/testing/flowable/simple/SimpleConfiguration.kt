@@ -26,7 +26,7 @@ class SimpleConfiguration {
     fun someService(apiClient: MyApiClient) = SimpleService(MyApiClient("for someService1"))
 
     @Bean
-    fun someApiClient() = MyApiClient("for someService2")
+    fun apiClient2() = MyApiClient("for someService2")
     @Bean
     fun someService2(apiClient: MyApiClient) = SimpleService(apiClient)
 
