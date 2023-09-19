@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import org.assertj.core.api.Assertions.assertThat
 import org.flowable.engine.HistoryService
-import org.flowable.engine.ProcessEngine
 import org.flowable.engine.RuntimeService
 import org.flowable.engine.TaskService
 import org.flowable.engine.test.Deployment
@@ -21,12 +20,8 @@ import testing.flowable.FlowableConfiguration
 import testing.flowable.simple.SimpleConfiguration
 import kotlin.test.BeforeTest
 
-// This is provided to demonstrate loading a Process Engine configuration from a Spring Configuration.
-// This is preferred (over LoadFromCfgXmlTest) due to type-checking and autocompletion provided by IDEs.
-// Based on https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-spring/src/test/java/org/flowable/spring/test/jupiter/SpringJunitJupiterTest.java
 @ExtendWith(FlowableSpringExtension::class)
 @ExtendWith(SpringExtension::class)
-// Use only the listed Configuration classes; a subsequent Configuration overrides prior Configuration elements
 @ContextConfiguration(
     classes = [
         FlowableConfiguration::class,
@@ -36,13 +31,10 @@ import kotlin.test.BeforeTest
 )
 class IntegratedEnrollmentAndEligibilityTest {
 
-    // Create TestConfiguration specifically for this test class
-    // Demonstrates different ways to overrides beans originally defined in SimpleTestConfiguration
     @TestConfiguration
     class MySpecificConfig
 
     companion object {
-        // Refer to https://wiremock.org/docs/junit-jupiter/#advanced-usage---programmatic
         @RegisterExtension
         @JvmStatic
         val mockApi: WireMockExtension = WireMockExtension.newInstance()
@@ -67,13 +59,17 @@ class IntegratedEnrollmentAndEligibilityTest {
                 )
         )
         mockApi.stubFor(
+            WireMock.post("/api/eligibility/healthcare")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withBody("{ \"eligible\": true}")
+                )
+        )
+        mockApi.stubFor(
             WireMock.post("/api/notifications")
                 .willReturn(WireMock.badRequest())
         )
     }
-
-    @Autowired
-    lateinit var processEngine: ProcessEngine
 
     @Autowired
     lateinit var runtimeService: RuntimeService
@@ -87,14 +83,11 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun simpleProcessTest() {
-        // Check WireMock
-        assertThat(mockApi.runtimeInfo.httpPort).isEqualTo(3000)
-        assertThat(mockApi.runtimeInfo.httpBaseUrl).isEqualTo("http://localhost:3000")
-
         // Create and start process instance
         val processVariables: Map<String, Any> = mapOf(
-            "applicationIncome" to 2000,
-            "applicationId" to applicationId
+            "applicationId" to applicationId,
+            "applicationIncome" to 350000,
+            "householdSize" to 2
         )
         runtimeService.startProcessInstanceByKey("integratedEnrollmentAndEligibilityDemo", processVariables)
 
@@ -102,15 +95,29 @@ class IntegratedEnrollmentAndEligibilityTest {
         assertThat(runtimeService.createProcessInstanceQuery().list()).isNotEmpty()
 
         // Get the single active task in the process
-        val verifyIncomeTask = taskService.createTaskQuery().taskName("Verifies income").singleResult()
-        // Since it's a UserTask, it must be manually completed
-        taskService.complete(verifyIncomeTask.id)
+        val makeDeterminationTask = taskService.createTaskQuery().taskName("Makes determination").singleResult()
+        taskService.complete(makeDeterminationTask.id)
+
+//        val verifyIncomeTask = taskService.createTaskQuery().taskName("Verifies income").singleResult()
 
 //        // Verify that a method on the TestService 'someService' is called (for serviceTask1)
 //        verify(someService).logMessage("Hello")
 //        // Verify that a method on the SomeApiClient is called (for serviceTask2)
 //        verify(apiClient2).callApiEndpoint()
 
+        val expectedActivities = arrayOf(
+            "applicationSubmitted",
+            "bpmnSequenceFlow_2", "splitOnProgramType",
+            "bpmnSequenceFlow_15", "bpmnTask_8",
+            "bpmnSequenceFlow_18", "bpmnGateway_17",
+            "bpmnSequenceFlow_19", "makesDetermination",
+            "bpmnSequenceFlow_3", "sendApprovalNotification",
+            "bpmnSequenceFlow_12", "applicationProcessed"
+        )
+        assertCompletion(userTasksRan = 1, expectedActivities)
+    }
+
+    private fun assertCompletion(userTasksRan: Int, expectedActivities: Array<String>) {
         // All tasks are complete, so there are no active tasks
         assertThat(taskService.createTaskQuery().list()).isEmpty()
         // Process instance is now completed
@@ -122,21 +129,11 @@ class IntegratedEnrollmentAndEligibilityTest {
         // Apparently this only returns UserTasks?
         val tasks = historyService.createHistoricTaskInstanceQuery().orderByHistoricTaskInstanceStartTime().asc().list()
         println("tasks: $tasks")
-        assertThat(tasks.size).isEqualTo(1)
+        assertThat(tasks.size).isEqualTo(userTasksRan)
 
         // Activities have tasks and sequenceFlows that were executed
         val activities = historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
         val activityIds = activities.map { it.activityId }
-        println(activityIds)
-        assertThat(activityIds).containsSequence(
-            "applicationSubmitted",
-            "bpmnSequenceFlow_2", "splitOnProgramType",
-            "bpmnSequenceFlow_6", "checksEligibility",
-            "bpmnSequenceFlow_8", "bpmnGateway_7",
-            "bpmnSequenceFlow_9", "verifiesIncome",
-            "bpmnSequenceFlow_11", "bpmnGateway_8",
-            "bpmnSequenceFlow_14", "sendDenialNotification",
-            "bpmnSequenceFlow_5", "applicationProcessed"
-        )
+        assertThat(activityIds).containsSequence(*expectedActivities)
     }
 }

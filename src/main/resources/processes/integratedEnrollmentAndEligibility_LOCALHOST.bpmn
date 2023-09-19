@@ -4,7 +4,7 @@
     <extensionElements>
       <design:stencilid><![CDATA[BPMNDiagram]]></design:stencilid>
       <design:creationdate><![CDATA[2023-08-04T12:36:45.315Z]]></design:creationdate>
-      <design:modificationdate><![CDATA[2023-08-23T23:13:46.909Z]]></design:modificationdate>
+      <design:modificationdate><![CDATA[2023-09-19T13:25:06.937Z]]></design:modificationdate>
     </extensionElements>
     <userTask id="makesDetermination" name="Makes determination" flowable:dueDate="P5D">
       <extensionElements>
@@ -30,7 +30,9 @@
           <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestBody">
-          <flowable:string><![CDATA[{"notice_type":"approved"}]]></flowable:string>
+        <flowable:expression>
+          <![CDATA[{"notice_type":"${var:exists(eligibilityResponse) && (eligibilityResponse.eligibility_result == 'PregnantWomen' || eligibilityResponse.eligibility_result == 'ChildrenUnder19') ? 'mixed' : 'approved'}"}]]>
+        </flowable:expression>
         </flowable:field>
         <flowable:field name="disallowRedirects">
           <flowable:string><![CDATA[false]]></flowable:string>
@@ -96,13 +98,13 @@
           <flowable:string><![CDATA[POST]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestUrl">
-          <flowable:string><![CDATA[http://localhost:3000/api/eligibility]]></flowable:string>
+          <flowable:string><![CDATA[http://localhost:3000/api/eligibility/food]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestHeaders">
           <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestBody">
-          <flowable:expression><![CDATA[{"monthly_income_in_cents":${applicationIncome}}]]></flowable:expression>
+          <flowable:expression><![CDATA[{"monthly_income_in_cents":${applicationIncome},"household_size":${householdSize}}]]></flowable:expression>
         </flowable:field>
         <flowable:field name="disallowRedirects">
           <flowable:string><![CDATA[false]]></flowable:string>
@@ -129,7 +131,46 @@
         <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
       </extensionElements>
     </serviceTask>
-    <exclusiveGateway id="splitOnProgramType" name="Program type?" default="bpmnSequenceFlow_6">
+    <serviceTask id="bpmnTask_8" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
+      <extensionElements>
+        <flowable:field name="requestMethod">
+          <flowable:string><![CDATA[POST]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestUrl">
+          <flowable:string><![CDATA[http://localhost:3000/api/eligibility/healthcare]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestHeaders">
+          <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestBody">
+          <flowable:expression><![CDATA[{"monthly_income_in_cents":${applicationIncome},"household_size":${householdSize}}]]></flowable:expression>
+        </flowable:field>
+        <flowable:field name="disallowRedirects">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="responseVariableName">
+          <flowable:string><![CDATA[eligibilityResponse]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="ignoreException">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveRequestVariables">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParameters">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParametersTransient">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseVariableAsJson">
+          <flowable:string><![CDATA[true]]></flowable:string>
+        </flowable:field>
+        <design:stencilid><![CDATA[HttpTask]]></design:stencilid>
+        <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="splitOnProgramType" name="Program type?">
       <extensionElements>
         <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
@@ -141,6 +182,11 @@
       </extensionElements>
     </exclusiveGateway>
     <exclusiveGateway id="bpmnGateway_8" default="bpmnSequenceFlow_14">
+      <extensionElements>
+        <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
+      </extensionElements>
+    </exclusiveGateway>
+    <exclusiveGateway id="bpmnGateway_17" default="bpmnSequenceFlow_19">
       <extensionElements>
         <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
       </extensionElements>
@@ -182,6 +228,11 @@
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
+    <sequenceFlow id="bpmnSequenceFlow_18" sourceRef="bpmnTask_8" targetRef="bpmnGateway_17">
+      <extensionElements>
+        <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+      </extensionElements>
+    </sequenceFlow>
     <sequenceFlow id="bpmnSequenceFlow_4" name="Energy" sourceRef="splitOnProgramType" targetRef="makesDetermination">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
@@ -196,32 +247,59 @@
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(benefitProgramName, 'food')}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_9" name="Eligible (income &lt; $1,000)" sourceRef="bpmnGateway_7" targetRef="verifiesIncome">
-      <extensionElements>
-        <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
-        <design:labelrotation><![CDATA[0]]></design:labelrotation>
-        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
-      </extensionElements>
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligible}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_10" name="Not eligible (income &gt;= $1,000)" sourceRef="bpmnGateway_7" targetRef="sendDenialNotification">
+    <sequenceFlow id="bpmnSequenceFlow_15" name="Healthcare" sourceRef="splitOnProgramType" targetRef="bpmnTask_8">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_13" sourceRef="bpmnGateway_8" targetRef="makesDetermination">
+    <sequenceFlow id="bpmnSequenceFlow_9" name="Eligible" sourceRef="bpmnGateway_7" targetRef="verifiesIncome">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+        <design:labelrotation><![CDATA[0]]></design:labelrotation>
+        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'Eligible'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="bpmnSequenceFlow_10" name="Not eligible" sourceRef="bpmnGateway_7" targetRef="sendDenialNotification">
+      <extensionElements>
+        <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+        <design:labelrotation><![CDATA[0]]></design:labelrotation>
+        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
+      </extensionElements>
+    </sequenceFlow>
+    <sequenceFlow id="bpmnSequenceFlow_13" name="Income verified" sourceRef="bpmnGateway_8" targetRef="makesDetermination">
+      <extensionElements>
+        <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+        <design:labelrotation><![CDATA[0]]></design:labelrotation>
+        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(sufficient_proof_of_income_response, 'is_sufficient')}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_14" sourceRef="bpmnGateway_8" targetRef="sendDenialNotification">
+    <sequenceFlow id="bpmnSequenceFlow_14" name="Income rejected or need more information" sourceRef="bpmnGateway_8" targetRef="sendDenialNotification">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+        <design:labelrotation><![CDATA[0]]></design:labelrotation>
+        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
+    </sequenceFlow>
+    <sequenceFlow id="bpmnSequenceFlow_19" name="Eligible" sourceRef="bpmnGateway_17" targetRef="makesDetermination">
+      <extensionElements>
+        <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+        <design:labelrotation><![CDATA[0]]></design:labelrotation>
+        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
+      </extensionElements>
+    </sequenceFlow>
+    <sequenceFlow id="bpmnSequenceFlow_21" name="Not eligible" sourceRef="bpmnGateway_17" targetRef="sendDenialNotification">
+      <extensionElements>
+        <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+        <design:labelrotation><![CDATA[0]]></design:labelrotation>
+        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'NotEligible'}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="bpmnSequenceFlow_2" sourceRef="applicationSubmitted" targetRef="splitOnProgramType">
       <extensionElements>
@@ -232,7 +310,7 @@
   <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityDemo">
     <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityDemo" id="BPMNPlane_integratedEnrollmentAndEligibilityDemo">
       <bpmndi:BPMNShape bpmnElement="makesDetermination" id="BPMNShape_makesDetermination">
-        <omgdc:Bounds height="80.0" width="100.0" x="657.0" y="219.0"></omgdc:Bounds>
+        <omgdc:Bounds height="80.0" width="100.0" x="794.0" y="219.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="verifiesIncome" id="BPMNShape_verifiesIncome">
         <omgdc:Bounds height="80.0" width="100.0" x="657.0" y="423.0"></omgdc:Bounds>
@@ -246,6 +324,9 @@
       <bpmndi:BPMNShape bpmnElement="checksEligibility" id="BPMNShape_checksEligibility">
         <omgdc:Bounds height="80.0" width="100.0" x="537.0" y="619.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="bpmnTask_8" id="BPMNShape_bpmnTask_8">
+        <omgdc:Bounds height="80.0" width="100.0" x="565.0" y="42.599999999999966"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="splitOnProgramType" id="BPMNShape_splitOnProgramType">
         <omgdc:Bounds height="40.0" width="40.0" x="383.0" y="239.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
@@ -253,51 +334,72 @@
         <omgdc:Bounds height="40.0" width="40.0" x="687.0" y="639.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="bpmnGateway_8" id="BPMNShape_bpmnGateway_8">
-        <omgdc:Bounds height="40.0" width="40.0" x="807.0" y="443.0"></omgdc:Bounds>
+        <omgdc:Bounds height="40.0" width="40.0" x="824.0" y="443.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="bpmnGateway_17" id="BPMNShape_bpmnGateway_17">
+        <omgdc:Bounds height="40.0" width="40.0" x="824.0" y="62.599999999999966"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="applicationSubmitted" id="BPMNShape_applicationSubmitted">
-        <omgdc:Bounds height="30.0" width="30.0" x="250.0" y="244.0"></omgdc:Bounds>
+        <omgdc:Bounds height="30.0" width="30.0" x="219.0" y="244.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="applicationProcessed" id="BPMNShape_applicationProcessed">
         <omgdc:Bounds height="28.0" width="28.0" x="1201.0" y="245.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_11" id="BPMNEdge_bpmnSequenceFlow_11" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
         <omgdi:waypoint x="757.0" y="463.0"></omgdi:waypoint>
-        <omgdi:waypoint x="807.0" y="463.0"></omgdi:waypoint>
+        <omgdi:waypoint x="824.0" y="463.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_10" id="BPMNEdge_bpmnSequenceFlow_10" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="727.0" y="659.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="659.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="433.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_21" id="BPMNEdge_bpmnSequenceFlow_21" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="864.0" y="82.59999999999997"></omgdi:waypoint>
+        <omgdi:waypoint x="1363.0" y="82.59999999999997"></omgdi:waypoint>
+        <omgdi:waypoint x="1363.0" y="393.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1265.0" y="393.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_9" id="BPMNEdge_bpmnSequenceFlow_9" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="707.0" y="639.0"></omgdi:waypoint>
         <omgdi:waypoint x="707.0" y="503.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_13" id="BPMNEdge_bpmnSequenceFlow_13" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
-        <omgdi:waypoint x="816.9581589958159" y="453.0418410041841"></omgdi:waypoint>
-        <omgdi:waypoint x="707.0" y="344.0"></omgdi:waypoint>
-        <omgdi:waypoint x="707.0" y="299.0"></omgdi:waypoint>
+        <omgdi:waypoint x="844.0" y="443.0"></omgdi:waypoint>
+        <omgdi:waypoint x="844.0" y="299.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_12" id="BPMNEdge_bpmnSequenceFlow_12" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
         <omgdi:waypoint x="1099.0" y="259.0"></omgdi:waypoint>
         <omgdi:waypoint x="1201.0" y="259.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_15" id="BPMNEdge_bpmnSequenceFlow_15" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="403.0" y="239.0"></omgdi:waypoint>
+        <omgdi:waypoint x="403.0" y="82.59999999999997"></omgdi:waypoint>
+        <omgdi:waypoint x="565.0" y="82.59999999999997"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_14" id="BPMNEdge_bpmnSequenceFlow_14" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
-        <omgdi:waypoint x="847.0" y="463.0"></omgdi:waypoint>
+        <omgdi:waypoint x="864.0" y="463.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="463.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="433.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_3" id="BPMNEdge_bpmnSequenceFlow_3" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
-        <omgdi:waypoint x="757.0" y="259.0"></omgdi:waypoint>
+        <omgdi:waypoint x="894.0" y="259.0"></omgdi:waypoint>
         <omgdi:waypoint x="999.0" y="259.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_19" id="BPMNEdge_bpmnSequenceFlow_19" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="844.0" y="102.59999999999997"></omgdi:waypoint>
+        <omgdi:waypoint x="844.0" y="219.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_18" id="BPMNEdge_bpmnSequenceFlow_18" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="665.0" y="82.59999999999997"></omgdi:waypoint>
+        <omgdi:waypoint x="824.0" y="82.59999999999997"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_4" id="BPMNEdge_bpmnSequenceFlow_4" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="423.0" y="259.0"></omgdi:waypoint>
-        <omgdi:waypoint x="657.0" y="259.0"></omgdi:waypoint>
+        <omgdi:waypoint x="794.0" y="259.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_2" id="BPMNEdge_bpmnSequenceFlow_2" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="280.0" y="259.0"></omgdi:waypoint>
+        <omgdi:waypoint x="249.0" y="259.0"></omgdi:waypoint>
         <omgdi:waypoint x="383.0" y="259.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_8" id="BPMNEdge_bpmnSequenceFlow_8" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
