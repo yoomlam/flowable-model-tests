@@ -6,13 +6,13 @@
       <design:creationdate><![CDATA[2023-08-04T12:36:45.315Z]]></design:creationdate>
       <design:modificationdate><![CDATA[2023-09-19T13:25:06.937Z]]></design:modificationdate>
     </extensionElements>
-    <userTask id="makesDetermination" name="Makes determination" flowable:dueDate="P5D">
+    <userTask id="makeDetermination" name="Makes determination" flowable:dueDate="P5D">
       <extensionElements>
         <design:stencilid><![CDATA[FormTask]]></design:stencilid>
         <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
       </extensionElements>
     </userTask>
-    <userTask id="verifiesIncome" name="Verifies income" flowable:dueDate="P5D">
+    <userTask id="verifyIncome" name="Verifies income" flowable:dueDate="P5D">
       <extensionElements>
         <design:stencilid><![CDATA[FormTask]]></design:stencilid>
         <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
@@ -92,7 +92,7 @@
         <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
       </extensionElements>
     </serviceTask>
-    <serviceTask id="checksEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
+    <serviceTask id="checkFoodEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
       <extensionElements>
         <flowable:field name="requestMethod">
           <flowable:string><![CDATA[POST]]></flowable:string>
@@ -131,7 +131,7 @@
         <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
       </extensionElements>
     </serviceTask>
-    <serviceTask id="bpmnTask_8" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
+    <serviceTask id="checkHealthcareEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
       <extensionElements>
         <flowable:field name="requestMethod">
           <flowable:string><![CDATA[POST]]></flowable:string>
@@ -170,23 +170,23 @@
         <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
       </extensionElements>
     </serviceTask>
-    <exclusiveGateway id="splitOnProgramType" name="Program type?">
+    <exclusiveGateway id="programTypeGW" name="Program type?">
       <extensionElements>
         <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </exclusiveGateway>
-    <exclusiveGateway id="bpmnGateway_7" default="bpmnSequenceFlow_10">
+    <exclusiveGateway id="foodResultGW" default="whenNotEligibleFood">
       <extensionElements>
         <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
       </extensionElements>
     </exclusiveGateway>
-    <exclusiveGateway id="bpmnGateway_8" default="bpmnSequenceFlow_14">
+    <exclusiveGateway id="incomeVerificationGW" default="whenNotIncomeVerified">
       <extensionElements>
         <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
       </extensionElements>
     </exclusiveGateway>
-    <exclusiveGateway id="bpmnGateway_17" default="bpmnSequenceFlow_19">
+    <exclusiveGateway id="healthcareResultGW" default="whenHealthcareEligible">
       <extensionElements>
         <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
       </extensionElements>
@@ -203,37 +203,37 @@
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </endEvent>
-    <sequenceFlow id="bpmnSequenceFlow_3" sourceRef="makesDetermination" targetRef="sendApprovalNotification">
+    <sequenceFlow id="determinationMade" sourceRef="makeDetermination" targetRef="sendApprovalNotification">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_11" sourceRef="verifiesIncome" targetRef="bpmnGateway_8">
+    <sequenceFlow id="withIncomeVerification" sourceRef="verifyIncome" targetRef="incomeVerificationGW">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_12" sourceRef="sendApprovalNotification" targetRef="applicationProcessed">
+    <sequenceFlow id="approvalSent" sourceRef="sendApprovalNotification" targetRef="applicationProcessed">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_5" sourceRef="sendDenialNotification" targetRef="applicationProcessed">
+    <sequenceFlow id="denialSent" sourceRef="sendDenialNotification" targetRef="applicationProcessed">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_8" sourceRef="checksEligibility" targetRef="bpmnGateway_7">
+    <sequenceFlow id="withFoodApiResponse" sourceRef="checkFoodEligibility" targetRef="foodResultGW">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_18" sourceRef="bpmnTask_8" targetRef="bpmnGateway_17">
+    <sequenceFlow id="withHealthcareApiResponse" sourceRef="checkHealthcareEligibility" targetRef="healthcareResultGW">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_4" name="Energy" sourceRef="splitOnProgramType" targetRef="makesDetermination">
+    <sequenceFlow id="whenEnergyProgram" name="Energy" sourceRef="programTypeGW" targetRef="makeDetermination">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
@@ -241,7 +241,7 @@
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(benefitProgramName, 'energy')}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_6" name="Food" sourceRef="splitOnProgramType" targetRef="checksEligibility">
+    <sequenceFlow id="whenFoodProgram" name="Food" sourceRef="programTypeGW" targetRef="checkFoodEligibility">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
@@ -249,14 +249,14 @@
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(benefitProgramName, 'food')}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_15" name="Healthcare" sourceRef="splitOnProgramType" targetRef="bpmnTask_8">
+    <sequenceFlow id="whenHealthcareProgram" name="Healthcare" sourceRef="programTypeGW" targetRef="checkHealthcareEligibility">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_9" name="Eligible" sourceRef="bpmnGateway_7" targetRef="verifiesIncome">
+    <sequenceFlow id="whenEligibleFood" name="Eligible" sourceRef="foodResultGW" targetRef="verifyIncome">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
@@ -264,14 +264,14 @@
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'Eligible'}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_10" name="Not eligible" sourceRef="bpmnGateway_7" targetRef="sendDenialNotification">
+    <sequenceFlow id="whenNotEligibleFood" name="Not eligible" sourceRef="foodResultGW" targetRef="sendDenialNotification">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_13" name="Income verified" sourceRef="bpmnGateway_8" targetRef="makesDetermination">
+    <sequenceFlow id="whenIncomeVerified" name="Income verified" sourceRef="incomeVerificationGW" targetRef="makeDetermination">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
@@ -279,21 +279,21 @@
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(sufficient_proof_of_income_response, 'is_sufficient')}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_14" name="Income rejected or need more information" sourceRef="bpmnGateway_8" targetRef="sendDenialNotification">
+    <sequenceFlow id="whenNotIncomeVerified" name="Income rejected or need more information" sourceRef="incomeVerificationGW" targetRef="sendDenialNotification">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_19" name="Eligible" sourceRef="bpmnGateway_17" targetRef="makesDetermination">
+    <sequenceFlow id="whenHealthcareEligible" name="Eligible" sourceRef="healthcareResultGW" targetRef="makeDetermination">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_21" name="Not eligible" sourceRef="bpmnGateway_17" targetRef="sendDenialNotification">
+    <sequenceFlow id="whenNotHealthcareEligible" name="Not eligible" sourceRef="healthcareResultGW" targetRef="sendDenialNotification">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
@@ -301,7 +301,7 @@
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'NotEligible'}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="bpmnSequenceFlow_2" sourceRef="applicationSubmitted" targetRef="splitOnProgramType">
+    <sequenceFlow id="withApplication" sourceRef="applicationSubmitted" targetRef="programTypeGW">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
@@ -309,10 +309,10 @@
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityDemo">
     <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityDemo" id="BPMNPlane_integratedEnrollmentAndEligibilityDemo">
-      <bpmndi:BPMNShape bpmnElement="makesDetermination" id="BPMNShape_makesDetermination">
+      <bpmndi:BPMNShape bpmnElement="makeDetermination" id="BPMNShape_makeDetermination">
         <omgdc:Bounds height="80.0" width="100.0" x="794.0" y="219.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="verifiesIncome" id="BPMNShape_verifiesIncome">
+      <bpmndi:BPMNShape bpmnElement="verifyIncome" id="BPMNShape_verifyIncome">
         <omgdc:Bounds height="80.0" width="100.0" x="657.0" y="423.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sendApprovalNotification" id="BPMNShape_sendApprovalNotification">
@@ -321,22 +321,22 @@
       <bpmndi:BPMNShape bpmnElement="sendDenialNotification" id="BPMNShape_sendDenialNotification">
         <omgdc:Bounds height="80.0" width="100.0" x="1165.0" y="353.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="checksEligibility" id="BPMNShape_checksEligibility">
+      <bpmndi:BPMNShape bpmnElement="checkFoodEligibility" id="BPMNShape_checkFoodEligibility">
         <omgdc:Bounds height="80.0" width="100.0" x="537.0" y="619.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="bpmnTask_8" id="BPMNShape_bpmnTask_8">
+      <bpmndi:BPMNShape bpmnElement="checkHealthcareEligibility" id="BPMNShape_checkHealthcareEligibility">
         <omgdc:Bounds height="80.0" width="100.0" x="565.0" y="42.599999999999966"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="splitOnProgramType" id="BPMNShape_splitOnProgramType">
+      <bpmndi:BPMNShape bpmnElement="programTypeGW" id="BPMNShape_programTypeGW">
         <omgdc:Bounds height="40.0" width="40.0" x="383.0" y="239.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="bpmnGateway_7" id="BPMNShape_bpmnGateway_7">
+      <bpmndi:BPMNShape bpmnElement="foodResultGW" id="BPMNShape_foodResultGW">
         <omgdc:Bounds height="40.0" width="40.0" x="687.0" y="639.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="bpmnGateway_8" id="BPMNShape_bpmnGateway_8">
+      <bpmndi:BPMNShape bpmnElement="incomeVerificationGW" id="BPMNShape_incomeVerificationGW">
         <omgdc:Bounds height="40.0" width="40.0" x="824.0" y="443.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="bpmnGateway_17" id="BPMNShape_bpmnGateway_17">
+      <bpmndi:BPMNShape bpmnElement="healthcareResultGW" id="BPMNShape_healthcareResult">
         <omgdc:Bounds height="40.0" width="40.0" x="824.0" y="62.599999999999966"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="applicationSubmitted" id="BPMNShape_applicationSubmitted">
@@ -345,72 +345,72 @@
       <bpmndi:BPMNShape bpmnElement="applicationProcessed" id="BPMNShape_applicationProcessed">
         <omgdc:Bounds height="28.0" width="28.0" x="1201.0" y="245.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_11" id="BPMNEdge_bpmnSequenceFlow_11" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+      <bpmndi:BPMNEdge bpmnElement="withIncomeVerification" id="BPMNEdge_withIncomeVerification" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
         <omgdi:waypoint x="757.0" y="463.0"></omgdi:waypoint>
         <omgdi:waypoint x="824.0" y="463.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_10" id="BPMNEdge_bpmnSequenceFlow_10" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenNotEligibleFood" id="BPMNEdge_whenNotEligibleFood" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="727.0" y="659.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="659.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="433.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_21" id="BPMNEdge_bpmnSequenceFlow_21" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenNotHealthcareEligible" id="BPMNEdge_whenNotHealthcareEligible" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="864.0" y="82.59999999999997"></omgdi:waypoint>
         <omgdi:waypoint x="1363.0" y="82.59999999999997"></omgdi:waypoint>
         <omgdi:waypoint x="1363.0" y="393.0"></omgdi:waypoint>
         <omgdi:waypoint x="1265.0" y="393.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_9" id="BPMNEdge_bpmnSequenceFlow_9" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenEligibleFood" id="BPMNEdge_whenEligibleFood" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="707.0" y="639.0"></omgdi:waypoint>
         <omgdi:waypoint x="707.0" y="503.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_13" id="BPMNEdge_bpmnSequenceFlow_13" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenIncomeVerified" id="BPMNEdge_whenIncomeVerified" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="844.0" y="443.0"></omgdi:waypoint>
         <omgdi:waypoint x="844.0" y="299.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_12" id="BPMNEdge_bpmnSequenceFlow_12" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+      <bpmndi:BPMNEdge bpmnElement="approvalSent" id="BPMNEdge_approvalSent" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
         <omgdi:waypoint x="1099.0" y="259.0"></omgdi:waypoint>
         <omgdi:waypoint x="1201.0" y="259.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_15" id="BPMNEdge_bpmnSequenceFlow_15" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenHealthcareProgram" id="BPMNEdge_whenHealthcareProgram" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="403.0" y="239.0"></omgdi:waypoint>
         <omgdi:waypoint x="403.0" y="82.59999999999997"></omgdi:waypoint>
         <omgdi:waypoint x="565.0" y="82.59999999999997"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_14" id="BPMNEdge_bpmnSequenceFlow_14" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenNotIncomeVerified" id="BPMNEdge_whenNotIncomeVerified" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="864.0" y="463.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="463.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="433.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_3" id="BPMNEdge_bpmnSequenceFlow_3" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="determinationMade" id="BPMNEdge_determinationMade" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="894.0" y="259.0"></omgdi:waypoint>
         <omgdi:waypoint x="999.0" y="259.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_19" id="BPMNEdge_bpmnSequenceFlow_19" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenHealthcareEligible" id="BPMNEdge_whenHealthcareEligible" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="844.0" y="102.59999999999997"></omgdi:waypoint>
         <omgdi:waypoint x="844.0" y="219.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_18" id="BPMNEdge_bpmnSequenceFlow_18" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+      <bpmndi:BPMNEdge bpmnElement="withHealthcareApiResponse" id="BPMNEdge_withHealthcareApiResponse" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
         <omgdi:waypoint x="665.0" y="82.59999999999997"></omgdi:waypoint>
         <omgdi:waypoint x="824.0" y="82.59999999999997"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_4" id="BPMNEdge_bpmnSequenceFlow_4" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenEnergyProgram" id="BPMNEdge_whenEnergyProgram" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="423.0" y="259.0"></omgdi:waypoint>
         <omgdi:waypoint x="794.0" y="259.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_2" id="BPMNEdge_bpmnSequenceFlow_2" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+      <bpmndi:BPMNEdge bpmnElement="withApplication" id="BPMNEdge_withApplication" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
         <omgdi:waypoint x="249.0" y="259.0"></omgdi:waypoint>
         <omgdi:waypoint x="383.0" y="259.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_8" id="BPMNEdge_bpmnSequenceFlow_8" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+      <bpmndi:BPMNEdge bpmnElement="withFoodApiResponse" id="BPMNEdge_withFoodApiResponse" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
         <omgdi:waypoint x="637.0" y="659.0"></omgdi:waypoint>
         <omgdi:waypoint x="687.0" y="659.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_5" id="BPMNEdge_bpmnSequenceFlow_5" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+      <bpmndi:BPMNEdge bpmnElement="denialSent" id="BPMNEdge_denialSent" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
         <omgdi:waypoint x="1215.0" y="353.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="273.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="bpmnSequenceFlow_6" id="BPMNEdge_bpmnSequenceFlow_6" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenFoodProgram" id="BPMNEdge_whenFoodProgram" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="403.0" y="279.0"></omgdi:waypoint>
         <omgdi:waypoint x="403.0" y="659.0"></omgdi:waypoint>
         <omgdi:waypoint x="537.0" y="659.0"></omgdi:waypoint>
