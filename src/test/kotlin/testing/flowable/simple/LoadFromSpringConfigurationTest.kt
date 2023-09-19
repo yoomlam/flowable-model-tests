@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import testing.flowable.FlowableConfiguration
 import testing.flowable.simple.service.MyApiClient
 import kotlin.test.BeforeTest
 
@@ -34,7 +35,13 @@ import kotlin.test.BeforeTest
 @ExtendWith(FlowableSpringExtension::class)
 @ExtendWith(SpringExtension::class)
 // Use only the listed Configuration classes; a subsequent Configuration overrides prior Configuration elements
-@ContextConfiguration(classes = [SimpleConfiguration::class, LoadFromSpringConfigurationTest.MySpecificConfig::class])
+@ContextConfiguration(
+    classes = [
+        FlowableConfiguration::class,
+        SimpleConfiguration::class,
+        LoadFromSpringConfigurationTest.MySpecificConfig::class
+    ]
+)
 class LoadFromSpringConfigurationTest {
 
     // Create TestConfiguration specifically for this test class
