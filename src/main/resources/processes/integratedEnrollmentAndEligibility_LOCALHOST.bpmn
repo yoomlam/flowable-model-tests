@@ -239,7 +239,7 @@
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(benefitProgramName, 'energy')}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${benefitProgramName == 'energy'}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="whenFoodProgram" name="Food" sourceRef="programTypeGW" targetRef="checkFoodEligibility">
       <extensionElements>
@@ -247,7 +247,7 @@
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(benefitProgramName, 'food')}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${benefitProgramName == 'food'}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="whenHealthcareProgram" name="Healthcare" sourceRef="programTypeGW" targetRef="checkHealthcareEligibility">
       <extensionElements>
@@ -277,7 +277,7 @@
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vars:equals(sufficient_proof_of_income_response, 'is_sufficient')}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${sufficient_proof_of_income_response == 'is_sufficient'}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="whenNotIncomeVerified" name="Income rejected or need more information" sourceRef="incomeVerificationGW" targetRef="sendDenialNotification">
       <extensionElements>
