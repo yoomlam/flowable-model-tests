@@ -176,7 +176,7 @@
         <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
       </extensionElements>
     </exclusiveGateway>
-    <exclusiveGateway id="foodResultGW" default="whenNotEligibleFood">
+    <exclusiveGateway id="foodResultGW" default="whenUnknownFoodResult">
       <extensionElements>
         <design:stencilid><![CDATA[Exclusive_Databased_Gateway]]></design:stencilid>
       </extensionElements>
@@ -264,7 +264,15 @@
       </extensionElements>
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'Eligible'}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="whenNotEligibleFood" name="Not eligible" sourceRef="foodResultGW" targetRef="sendDenialNotification">
+    <sequenceFlow id="whenNotFoodEligible" name="Not eligible" sourceRef="foodResultGW" targetRef="sendDenialNotification">
+      <extensionElements>
+        <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
+        <design:labelrotation><![CDATA[0]]></design:labelrotation>
+        <design:display_ref_in_diagram><![CDATA[true]]></design:display_ref_in_diagram>
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'NotEligible'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="whenUnknownFoodResult" name="Unknown eligibility result" sourceRef="foodResultGW" targetRef="sendDenialNotification">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
         <design:labelrotation><![CDATA[0]]></design:labelrotation>
@@ -349,9 +357,15 @@
         <omgdi:waypoint x="757.0" y="463.0"></omgdi:waypoint>
         <omgdi:waypoint x="824.0" y="463.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="whenNotEligibleFood" id="BPMNEdge_whenNotEligibleFood" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+      <bpmndi:BPMNEdge bpmnElement="whenNotFoodEligible" id="BPMNEdge_whenNotFoodEligible" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="727.0" y="659.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="659.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1215.0" y="433.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="whenUnknownFoodResult" id="BPMNEdge_whenUnknownFoodResult" flowable:sourceDockerX="20.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="50.0" flowable:targetDockerY="50.0">
+        <omgdi:waypoint x="707.0" y="680.0"></omgdi:waypoint>
+        <omgdi:waypoint x="707.0" y="699.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1215.0" y="699.0"></omgdi:waypoint>
         <omgdi:waypoint x="1215.0" y="433.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="whenNotHealthcareEligible" id="BPMNEdge_whenNotHealthcareEligible" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">

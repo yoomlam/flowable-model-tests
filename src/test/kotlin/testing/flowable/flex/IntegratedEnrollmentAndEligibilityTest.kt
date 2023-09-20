@@ -208,7 +208,20 @@ class IntegratedEnrollmentAndEligibilityTest {
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
-            "whenNotEligibleFood", "sendDenialNotification", "denialSent", "applicationProcessed"
+            "whenNotFoodEligible", "sendDenialNotification", "denialSent", "applicationProcessed"
+        )
+        runToCompletion(processVariables, expectedActivities)
+    }
+
+    @Test
+    @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
+    fun whenUnknownFoodResult() {
+        stubResponses(foodEligibilityResult = "some unknown response from eligibility API")
+        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
+        val expectedActivities = arrayOf(
+            "applicationSubmitted", "withApplication", "programTypeGW",
+            "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
+            "whenUnknownFoodResult", "sendDenialNotification", "denialSent", "applicationProcessed"
         )
         runToCompletion(processVariables, expectedActivities)
     }
