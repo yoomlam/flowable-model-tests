@@ -40,7 +40,7 @@ class IntegratedEnrollmentAndEligibilityTest {
         @JvmStatic
         val mockApi: WireMockExtension = WireMockExtension.newInstance()
             .failOnUnmatchedRequests(true)
-            .options(WireMockConfiguration.wireMockConfig().port(3000))
+            .options(WireMockConfiguration.wireMockConfig().port(3001))
             .build()
     }
 

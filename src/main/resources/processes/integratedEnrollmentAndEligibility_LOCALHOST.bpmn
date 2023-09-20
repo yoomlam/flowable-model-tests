@@ -24,7 +24,7 @@
           <flowable:string><![CDATA[POST]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestUrl">
-          <flowable:expression><![CDATA[http://localhost:3000/api/applications/${applicationId}/notifications]]></flowable:expression>
+          <flowable:expression><![CDATA[http://localhost:3001/api/applications/${applicationId}/notifications]]></flowable:expression>
         </flowable:field>
         <flowable:field name="requestHeaders">
           <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
@@ -62,7 +62,7 @@
           <flowable:string><![CDATA[POST]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestUrl">
-          <flowable:expression><![CDATA[http://localhost:3000/api/applications/${applicationId}/notifications]]></flowable:expression>
+          <flowable:expression><![CDATA[http://localhost:3001/api/applications/${applicationId}/notifications]]></flowable:expression>
         </flowable:field>
         <flowable:field name="requestHeaders">
           <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
@@ -98,7 +98,7 @@
           <flowable:string><![CDATA[POST]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestUrl">
-          <flowable:string><![CDATA[http://localhost:3000/api/eligibility/food]]></flowable:string>
+          <flowable:string><![CDATA[http://localhost:3001/api/eligibility/food]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestHeaders">
           <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
@@ -137,7 +137,7 @@
           <flowable:string><![CDATA[POST]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestUrl">
-          <flowable:string><![CDATA[http://localhost:3000/api/eligibility/healthcare]]></flowable:string>
+          <flowable:string><![CDATA[http://localhost:3001/api/eligibility/healthcare]]></flowable:string>
         </flowable:field>
         <flowable:field name="requestHeaders">
           <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
