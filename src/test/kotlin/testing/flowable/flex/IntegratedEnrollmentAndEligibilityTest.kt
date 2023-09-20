@@ -89,7 +89,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     private val defaultProcessVariables = mapOf(
         // applicationId is used in /api/applications/$applicationId/notifications
         "applicationId" to applicationId,
-        "benefitProgramName" to "healthcare",
+        "benefitProgramName" to "",
         // applicationIncome and householdSize are used in the payload to /api/eligibility/*
         "applicationIncome" to 3500 * 100, // in cents
         "householdSize" to 2
@@ -102,17 +102,20 @@ class IntegratedEnrollmentAndEligibilityTest {
         //   When should this info be pulled from the DB, rather than as process variables?
     )
 
+    // Convenience method to set process variables and override the default ones
+    private fun processVariables(vararg pairs: Pair<String, Any>) = defaultProcessVariables + pairs
+
     // Convenience method to create correct-typed map of output variable values from tasks, i.e., UserTasks
     private fun taskOutputMap(vararg pairs: Pair<String, Any>) = mapOf(*pairs)
 
     // Tip: Go to https://bpmn-io.github.io/bpmn-js-token-simulation/modeler.html?pp=1 and open the bpmn file.
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
-    fun defaultPath() {
-        stubResponses()
+    fun defaultPathUnknownProgram() {
+        stubResponses(healthcareEligibilityResult = "some unknown response from eligibility API")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
-            "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
+            "whenUnknownProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
             "whenUnknownHealthcareResult", "sendDenialNotification", "denialSent", "applicationProcessed"
         )
         runToCompletion(defaultProcessVariables, expectedActivities)
@@ -122,6 +125,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForHealthcare() {
         stubResponses(healthcareEligibilityResult = "Eligible")
+        val processVariables = processVariables("benefitProgramName" to "healthcare")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
@@ -133,26 +137,27 @@ class IntegratedEnrollmentAndEligibilityTest {
             // dueDate format: https://documentation.flowable.com/latest/model/forms/reference/date/index.html#formats
         )
         val userTasks = linkedMapOf("makeDetermination" to taskOutputMap())
-        runToCompletion(defaultProcessVariables, expectedActivities, userTasks)
+        runToCompletion(processVariables, expectedActivities, userTasks)
     }
 
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun notEligibleForHealthcare() {
         stubResponses(healthcareEligibilityResult = "NotEligible")
+        val processVariables = processVariables("benefitProgramName" to "healthcare")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
             "whenNotHealthcareEligible", "sendDenialNotification", "denialSent", "applicationProcessed"
         )
-        runToCompletion(defaultProcessVariables, expectedActivities)
+        runToCompletion(processVariables, expectedActivities)
     }
 
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun whenUnknownHealthcareResult() {
         stubResponses(healthcareEligibilityResult = "some unknown response from eligibility API")
-        val processVariables = defaultProcessVariables
+        val processVariables = processVariables("benefitProgramName" to "healthcare")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
@@ -165,7 +170,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForEnergy() {
         stubResponses()
-        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "energy")
+        val processVariables = processVariables("benefitProgramName" to "energy")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenEnergyProgram", "makeDetermination", "determinationMade", "sendApprovalNotification", "approvalSent", "applicationProcessed"
@@ -184,7 +189,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForFoodAndIncomeVerified() {
         stubResponses(foodEligibilityResult = "Eligible")
-        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
+        val processVariables = processVariables("benefitProgramName" to "food")
         val expectedActivities = arrayOf(
             "applicationSubmitted",
             "withApplication", "programTypeGW",
@@ -203,7 +208,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForFoodButIncomeNotVerified() {
         stubResponses(foodEligibilityResult = "Eligible")
-        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
+        val processVariables = processVariables("benefitProgramName" to "food")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
@@ -222,7 +227,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForFoodButUnknownIncomeVerificationResult() {
         stubResponses(foodEligibilityResult = "Eligible")
-        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
+        val processVariables = processVariables("benefitProgramName" to "food")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
@@ -239,7 +244,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun notEligibleForFood() {
         stubResponses(foodEligibilityResult = "NotEligible")
-        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
+        val processVariables = processVariables("benefitProgramName" to "food")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
@@ -252,7 +257,7 @@ class IntegratedEnrollmentAndEligibilityTest {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun whenUnknownFoodResult() {
         stubResponses(foodEligibilityResult = "some unknown response from eligibility API")
-        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
+        val processVariables = processVariables("benefitProgramName" to "food")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
