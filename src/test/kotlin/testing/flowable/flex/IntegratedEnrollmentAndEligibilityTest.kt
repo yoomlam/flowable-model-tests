@@ -202,6 +202,23 @@ class IntegratedEnrollmentAndEligibilityTest {
 
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
+    fun eligibleForFoodButUnknownIncomeVerificationResult() {
+        stubResponses(foodEligibilityResult = "Eligible")
+        val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
+        val expectedActivities = arrayOf(
+            "applicationSubmitted", "withApplication", "programTypeGW",
+            "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
+            "whenEligibleFood", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
+            "whenUnknownIncomeVerification", "sendDenialNotification", "denialSent", "applicationProcessed"
+        )
+        val userTasks = linkedMapOf(
+            "verifyIncome" to taskOutputMap("sufficient_proof_of_income_response" to "some unknown response from income API")
+        )
+        runToCompletion(processVariables, expectedActivities, userTasks)
+    }
+
+    @Test
+    @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun notEligibleForFood() {
         stubResponses(foodEligibilityResult = "NotEligible")
         val processVariables = defaultProcessVariables + mapOf("benefitProgramName" to "food")
