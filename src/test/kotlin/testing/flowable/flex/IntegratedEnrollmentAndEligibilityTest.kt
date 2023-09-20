@@ -189,7 +189,7 @@ class IntegratedEnrollmentAndEligibilityTest {
             "applicationSubmitted",
             "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
-            "whenEligibleFood", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
+            "whenFoodEligible", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
             "whenIncomeVerified", "makeDetermination", "determinationMade", "sendApprovalNotification", "approvalSent", "applicationProcessed"
         )
         val userTasks = linkedMapOf(
@@ -207,7 +207,7 @@ class IntegratedEnrollmentAndEligibilityTest {
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
-            "whenEligibleFood", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
+            "whenFoodEligible", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
             "whenNotIncomeVerified", "sendDenialNotification", "denialSent", "applicationProcessed"
         )
         // https://github.com/navapbc/benefit-delivery-systems/blob/cdb23eb1f02a0f367cfc864ff89505dfce36e217/portal/src/components/staff/features/task-actions/VerifyIncome.tsx#L64C20-L64C28
@@ -226,7 +226,7 @@ class IntegratedEnrollmentAndEligibilityTest {
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
-            "whenEligibleFood", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
+            "whenFoodEligible", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
             "whenUnknownIncomeVerification", "sendDenialNotification", "denialSent", "applicationProcessed"
         )
         val userTasks = linkedMapOf(
