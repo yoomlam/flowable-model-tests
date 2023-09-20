@@ -103,13 +103,25 @@ class IntegratedEnrollmentAndEligibilityTest {
     )
 
     // Convenience method to create correct-typed map of output variable values from tasks, i.e., UserTasks
-    private inline fun taskOutputMap(vararg pairs: Pair<String, Any>) = mapOf(*pairs)
+    private fun taskOutputMap(vararg pairs: Pair<String, Any>) = mapOf(*pairs)
 
     // Tip: Go to https://bpmn-io.github.io/bpmn-js-token-simulation/modeler.html?pp=1 and open the bpmn file.
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun defaultPath() {
         stubResponses()
+        val expectedActivities = arrayOf(
+            "applicationSubmitted", "withApplication", "programTypeGW",
+            "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
+            "whenUnknownHealthcareResult", "sendDenialNotification", "denialSent", "applicationProcessed"
+        )
+        runToCompletion(defaultProcessVariables, expectedActivities)
+    }
+
+    @Test
+    @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
+    fun eligibleForHealthcare() {
+        stubResponses(healthcareEligibilityResult = "Eligible")
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
@@ -126,19 +138,25 @@ class IntegratedEnrollmentAndEligibilityTest {
 
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
-    fun eligibleForHealthcare() {
-        defaultPath()
-    }
-
-    @Test
-    @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun notEligibleForHealthcare() {
         stubResponses(healthcareEligibilityResult = "NotEligible")
-        val processVariables = defaultProcessVariables
         val expectedActivities = arrayOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
             "whenNotHealthcareEligible", "sendDenialNotification", "denialSent", "applicationProcessed"
+        )
+        runToCompletion(defaultProcessVariables, expectedActivities)
+    }
+
+    @Test
+    @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
+    fun whenUnknownHealthcareResult() {
+        stubResponses(healthcareEligibilityResult = "some unknown response from eligibility API")
+        val processVariables = defaultProcessVariables
+        val expectedActivities = arrayOf(
+            "applicationSubmitted", "withApplication", "programTypeGW",
+            "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
+            "whenUnknownHealthcareResult", "sendDenialNotification", "denialSent", "applicationProcessed"
         )
         runToCompletion(processVariables, expectedActivities)
     }
@@ -245,6 +263,7 @@ class IntegratedEnrollmentAndEligibilityTest {
 
     private fun completeTask(taskKey: String, taskOutputVariables: Map<String, Any>) {
         val task = taskService.createTaskQuery().taskDefinitionKey(taskKey).singleResult()
+        assertThat(task).`as`("Task $taskKey").isNotNull
         taskService.complete(task.id, taskOutputVariables)
     }
 
