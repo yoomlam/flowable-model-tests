@@ -1,5 +1,10 @@
 package testing.flowable
 
+import org.flowable.cmmn.api.CmmnHistoryService
+import org.flowable.cmmn.api.CmmnManagementService
+import org.flowable.cmmn.api.CmmnRepositoryService
+import org.flowable.cmmn.api.CmmnRuntimeService
+import org.flowable.cmmn.api.CmmnTaskService
 import org.flowable.dmn.api.DmnDecisionService
 import org.flowable.dmn.api.DmnRepositoryService
 import org.flowable.dmn.engine.DmnEngine
@@ -20,8 +25,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(
     classes = [
-        FlowableConfiguration::class,
-        FlowableDmnConfiguration::class
+        FlowableDmnConfiguration::class,
+        FlowableCmmnConfiguration::class,
+        FlowableConfiguration::class
     ]
 )
 annotation class FlowableSpringTesting
@@ -56,4 +62,21 @@ abstract class FlowableSpringTestBase {
 
     @Autowired
     lateinit var dmnRepositoryService: DmnRepositoryService
+
+    // CMMN
+
+    @Autowired
+    lateinit var cmmnRepositoryService: CmmnRepositoryService
+
+    @Autowired
+    lateinit var cmmnRuntimeService: CmmnRuntimeService
+
+    @Autowired
+    lateinit var cmmnTaskService: CmmnTaskService
+
+    @Autowired
+    lateinit var cmmnHistoryService: CmmnHistoryService
+
+    @Autowired
+    lateinit var cmmnManagementService: CmmnManagementService
 }
