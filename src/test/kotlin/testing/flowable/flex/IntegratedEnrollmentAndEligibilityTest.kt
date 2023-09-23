@@ -1,15 +1,15 @@
 package testing.flowable.flex
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
-import org.assertj.core.api.Assertions.assertThat
 import org.flowable.engine.test.Deployment
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Import
 import testing.flowable.FlowableSpringTestBase
+import testing.flowable.VarValueMap
+import testing.flowable.wireMockExtension
 
 @TestConfiguration
 private class IntegratedEnrollmentAndEligibilityTestConfig
@@ -22,10 +22,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
 
         @RegisterExtension
         @JvmStatic
-        val mockApi: WireMockExtension = WireMockExtension.newInstance()
-            .failOnUnmatchedRequests(true)
-            .options(WireMockConfiguration.wireMockConfig().port(3001))
-            .build()
+        val mockApi: WireMockExtension = wireMockExtension()
     }
 
     private fun stubResponses(
@@ -59,9 +56,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
         // 'mixed' : 'approved' is the payload to /api/applications/$applicationId/notifications
     }
 
-    // Variables going into the process from the startEvent
-    // https://github.com/navapbc/benefit-delivery-systems/blob/cdb23eb1f02a0f367cfc864ff89505dfce36e217/portal/src/pages/api/applications/index.ts#L40
-    private val defaultProcessVariables = mapOf(
+    override fun defaultProcessVariables() = mapOf(
         // applicationId is used in /api/applications/$applicationId/notifications
         "applicationId" to applicationId,
         "benefitProgramName" to "",
@@ -77,23 +72,17 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
         //   When should this info be pulled from the DB, rather than as process variables?
     )
 
-    // Convenience method to set process variables and override the default ones
-    private fun processVariables(vararg pairs: Pair<String, Any>) = defaultProcessVariables + pairs
-
-    // Convenience method to create correct-typed map of output variable values from tasks, i.e., UserTasks
-    private fun taskOutputMap(vararg pairs: Pair<String, Any>) = mapOf(*pairs)
-
     // Tip: Go to https://bpmn-io.github.io/bpmn-js-token-simulation/modeler.html?pp=1 and open the bpmn file.
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun defaultPathUnknownProgram() {
         stubResponses(healthcareEligibilityResult = "some unknown response from eligibility API")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenUnknownProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
             "whenUnknownHealthcareResult", "sendDenialNotification", "denialSent", "applicationProcessed"
         )
-        runToCompletion(defaultProcessVariables, expectedActivities)
+        runToCompletion(defaultProcessVariables(), expectedActivities)
     }
 
     @Test
@@ -101,7 +90,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun eligibleForHealthcare() {
         stubResponses(healthcareEligibilityResult = "Eligible")
         val processVariables = processVariables("benefitProgramName" to "healthcare")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
             // chooses checkHealthcareEligibility path b/c flow healthcareProgram has no 'conditionExpression' defined
@@ -120,7 +109,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun notEligibleForHealthcare() {
         stubResponses(healthcareEligibilityResult = "NotEligible")
         val processVariables = processVariables("benefitProgramName" to "healthcare")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
             "whenNotHealthcareEligible", "sendDenialNotification", "denialSent", "applicationProcessed"
@@ -133,7 +122,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun whenUnknownHealthcareResult() {
         stubResponses(healthcareEligibilityResult = "some unknown response from eligibility API")
         val processVariables = processVariables("benefitProgramName" to "healthcare")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
             "whenUnknownHealthcareResult", "sendDenialNotification", "denialSent", "applicationProcessed"
@@ -146,7 +135,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun eligibleForEnergy() {
         stubResponses()
         val processVariables = processVariables("benefitProgramName" to "energy")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenEnergyProgram", "makeDetermination", "determinationMade", "sendApprovalNotification", "approvalSent", "applicationProcessed"
         )
@@ -165,7 +154,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun eligibleForFoodAndIncomeVerified() {
         stubResponses(foodEligibilityResult = "Eligible")
         val processVariables = processVariables("benefitProgramName" to "food")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted",
             "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
@@ -184,7 +173,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun eligibleForFoodButIncomeNotVerified() {
         stubResponses(foodEligibilityResult = "Eligible")
         val processVariables = processVariables("benefitProgramName" to "food")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
             "whenFoodEligible", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
@@ -203,7 +192,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun eligibleForFoodButUnknownIncomeVerificationResult() {
         stubResponses(foodEligibilityResult = "Eligible")
         val processVariables = processVariables("benefitProgramName" to "food")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
             "whenFoodEligible", "verifyIncome", "withIncomeVerification", "incomeVerificationGW",
@@ -220,7 +209,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun notEligibleForFood() {
         stubResponses(foodEligibilityResult = "NotEligible")
         val processVariables = processVariables("benefitProgramName" to "food")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
             "whenNotFoodEligible", "sendDenialNotification", "denialSent", "applicationProcessed"
@@ -233,7 +222,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     fun whenUnknownFoodResult() {
         stubResponses(foodEligibilityResult = "some unknown response from eligibility API")
         val processVariables = processVariables("benefitProgramName" to "food")
-        val expectedActivities = arrayOf(
+        val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
             "whenUnknownFoodResult", "sendDenialNotification", "denialSent", "applicationProcessed"
@@ -241,37 +230,18 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
         runToCompletion(processVariables, expectedActivities)
     }
 
-    private fun completeTask(taskKey: String, taskOutputVariables: Map<String, Any>) {
-        val task = taskService.createTaskQuery().taskDefinitionKey(taskKey).singleResult()
-        assertThat(task).`as`("Task $taskKey").isNotNull
-        taskService.complete(task.id, taskOutputVariables)
-    }
-
     private fun runToCompletion(
-        processVariables: Map<String, Any>,
-        expectedActivities: Array<String>,
-        userTasks: LinkedHashMap<String, Map<String, Any>> = LinkedHashMap()
+        processVariables: VarValueMap,
+        expectedActivities: List<String>,
+        userTasks: LinkedHashMap<String, VarValueMap> = LinkedHashMap()
     ) {
-        // Start process with processVariables
-        runtimeService.startProcessInstanceByKey("integratedEnrollmentAndEligibilityDemo", processVariables)
+        startProcess("integratedEnrollmentAndEligibilityDemo", processVariables)
 
         userTasks.forEach { completeTask(it.key, it.value) }
+        assertUserTasksOccurred(userTasks.keys.toList())
 
-        // All tasks are complete, so there are no active tasks
-        assertThat(taskService.createTaskQuery().list()).isEmpty()
-        // Process instance is now completed
-        assertThat(runtimeService.createProcessInstanceQuery().list()).isEmpty()
-        // Check history
-        assertThat(historyService.createHistoricProcessInstanceQuery().count()).isEqualTo(1)
-
-        // Activities have tasks and sequenceFlows that were executed
-        val activities = historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
-        val activityIds = activities.map { it.activityId }
-        assertThat(activityIds).containsSequence(*expectedActivities)
-
-        // Check userTasks that were ran
-        val userTasksRan = historyService.createHistoricTaskInstanceQuery().orderByHistoricTaskInstanceStartTime().asc().list()
-        val userTaskKeys = userTasksRan.map { it.taskDefinitionKey }
-        assertThat(userTaskKeys).containsSequence(userTasks.keys.asIterable())
+        assertProcessCount()
+        assertProcessesComplete()
+        assertActivitiesOccurred(expectedActivities)
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import javax.sql.DataSource
 
+// For relationship among beans defined below, check out
+// https://www.flowable.com/open-source/docs/cmmn/ch07-architecture
 // Refer to https://github.com/flowable/flowable-engine/blob/flowable-6.8.0/modules/flowable-cmmn-spring/src/test/java/org/flowable/spring/test/jupiter/CmmnSpringJunitJupiterTest.java
 @Configuration(proxyBeanMethods = false)
 class FlowableCmmnConfiguration {
