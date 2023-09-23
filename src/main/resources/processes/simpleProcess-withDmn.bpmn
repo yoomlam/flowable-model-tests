@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="Examples">
+
+    <process id="simpleProcess-withDmn">
+
+        <startEvent id="start"/>
+        <sequenceFlow id="flow1" sourceRef="start" targetRef="firstUserTask"/>
+
+        <userTask id="firstUserTask" name="First UserTask"/>
+        <sequenceFlow id="flow2" sourceRef="firstUserTask" targetRef="setInput"/>
+
+        <serviceTask id="setInput" name="setInput"
+                     flowable:expression="${'string test'}"
+                     flowable:resultVariableName="input1">
+        </serviceTask>
+        <sequenceFlow id="flow2.1" sourceRef="setInput" targetRef="decisionTask1"/>
+
+        <serviceTask id="decisionTask1" name="DecisionTask 1" flowable:type="dmn">
+          <extensionElements>
+            <flowable:field name="decisionTableReferenceKey">
+              <flowable:string><![CDATA[decision1]]></flowable:string>
+            </flowable:field>
+            <flowable:field name="decisionTaskThrowErrorOnNoHits">
+              <flowable:string><![CDATA[true]]></flowable:string>
+            </flowable:field>
+            <flowable:field name="fallbackToDefaultTenant">
+              <flowable:string><![CDATA[false]]></flowable:string>
+            </flowable:field>
+            <flowable:field name="sameDeployment">
+              <flowable:string><![CDATA[false]]></flowable:string>
+            </flowable:field>
+          </extensionElements>
+        </serviceTask>
+        <sequenceFlow id="flow3" sourceRef="decisionTask1" targetRef="theEnd"/>
+
+        <endEvent id="theEnd"/>
+
+    </process>
+
+</definitions>

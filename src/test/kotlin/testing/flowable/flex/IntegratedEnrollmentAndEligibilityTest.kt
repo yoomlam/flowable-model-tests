@@ -4,34 +4,18 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import org.assertj.core.api.Assertions.assertThat
-import org.flowable.engine.HistoryService
-import org.flowable.engine.RuntimeService
-import org.flowable.engine.TaskService
 import org.flowable.engine.test.Deployment
-import org.flowable.spring.impl.test.FlowableSpringExtension
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.RegisterExtension
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import testing.flowable.FlowableConfiguration
-import testing.flowable.simple.SimpleConfiguration
+import org.springframework.context.annotation.Import
+import testing.flowable.FlowableSpringTestBase
 
-@ExtendWith(FlowableSpringExtension::class)
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(
-    classes = [
-        FlowableConfiguration::class,
-        SimpleConfiguration::class,
-        IntegratedEnrollmentAndEligibilityTest.MySpecificConfig::class
-    ]
-)
-class IntegratedEnrollmentAndEligibilityTest {
+@TestConfiguration
+private class IntegratedEnrollmentAndEligibilityTestConfig
 
-    @TestConfiguration
-    class MySpecificConfig
+@Import(IntegratedEnrollmentAndEligibilityTestConfig::class)
+class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
 
     companion object {
         const val applicationId = 20230919
@@ -74,15 +58,6 @@ class IntegratedEnrollmentAndEligibilityTest {
         // (eligibility_result == 'PregnantWomen' || eligibility_result == 'ChildrenUnder19') ?
         // 'mixed' : 'approved' is the payload to /api/applications/$applicationId/notifications
     }
-
-    @Autowired
-    lateinit var runtimeService: RuntimeService
-
-    @Autowired
-    lateinit var taskService: TaskService
-
-    @Autowired
-    lateinit var historyService: HistoryService
 
     // Variables going into the process from the startEvent
     // https://github.com/navapbc/benefit-delivery-systems/blob/cdb23eb1f02a0f367cfc864ff89505dfce36e217/portal/src/pages/api/applications/index.ts#L40

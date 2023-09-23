@@ -1,5 +1,6 @@
 package testing.flowable
 
+import org.flowable.common.engine.impl.EngineConfigurator
 import org.flowable.engine.HistoryService
 import org.flowable.engine.ManagementService
 import org.flowable.engine.ProcessEngine
@@ -8,8 +9,10 @@ import org.flowable.engine.RuntimeService
 import org.flowable.engine.TaskService
 import org.flowable.spring.ProcessEngineFactoryBean
 import org.flowable.spring.SpringProcessEngineConfiguration
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.jdbc.datasource.SimpleDriverDataSource
 import org.springframework.transaction.annotation.EnableTransactionManagement
@@ -33,17 +36,35 @@ class FlowableConfiguration {
     }
 
     @Bean
-    fun processEngineConfiguration(dataSource: DataSource): SpringProcessEngineConfiguration =
+    fun dataSourceTransactionManager(dataSource: DataSource) = DataSourceTransactionManager(dataSource)
+
+//    @Bean
+//    fun engineConfiguratorList(): MutableList<EngineConfigurator> = mutableListOf<EngineConfigurator>()
+
+    @Bean
+    fun processEngineConfiguration(
+        dataSource: DataSource,
+        dataSourceTransactionManager: DataSourceTransactionManager
+    ): SpringProcessEngineConfiguration =
         SpringProcessEngineConfiguration().apply {
             setDataSource(dataSource)
-            transactionManager = DataSourceTransactionManager(dataSource)
+            transactionManager = dataSourceTransactionManager
             databaseSchemaUpdate = "true"
             isAsyncExecutorActivate = false
         }
 
     @Bean
-    fun processEngineFactory(processEngineConfiguration: SpringProcessEngineConfiguration) =
+    @Lazy
+    fun processEngineFactory(
+        processEngineConfiguration: SpringProcessEngineConfiguration,
+        applicationContext: ApplicationContext,
+        engineConfiguratorList: List<EngineConfigurator>
+    ) =
         ProcessEngineFactoryBean().apply {
+            val c = applicationContext.getBeansOfType(EngineConfigurator::class.java)
+            println("EngineConfigurators: ${c.values}")
+            // https://www.flowable.com/open-source/docs/dmn/ch02-Configuration#plug-into-process-engine
+            processEngineConfiguration.configurators = c.values.toList() // engineConfiguratorList
             this.processEngineConfiguration = processEngineConfiguration
         }
 
