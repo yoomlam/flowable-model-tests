@@ -8,7 +8,8 @@ class TestService(private val initMessage: String = "default") {
     init {
         log.info { "Creating TestService: $initMessage" }
     }
-    fun logMessage(message: String) {
+    fun logMessage(message: String): String {
         log.info { "TestService ($initMessage): $message" }
+        return message
     }
 }

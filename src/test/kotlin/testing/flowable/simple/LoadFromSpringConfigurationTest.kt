@@ -33,7 +33,7 @@ import kotlin.test.BeforeTest
 // Demonstrates different ways to overrides beans originally defined in SimpleTestConfiguration
 @TestConfiguration
 private class MyTestConfig {
-    // Overrides 'someService' bean referenced directly by serviceTask1 in simpleProcess-serviceCall.bpmn
+    // Overrides SimpleConfiguration's 'someService' bean referenced directly by serviceTask1 in simpleProcess-serviceCall.bpmn
     @Bean
     fun someService(): TestService = spy(TestService("in ${this::class.simpleName}"))
 

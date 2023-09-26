@@ -240,8 +240,8 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
         userTasks.forEach { completeTask(it.key, it.value) }
         assertUserTasksOccurred(userTasks.keys.toList())
 
-        assertProcessCount()
         assertProcessesComplete()
+        assertProcessCount(1)
         assertActivitiesOccurred(expectedActivities)
     }
 }

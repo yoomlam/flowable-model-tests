@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flowable="http://flowable.org/cmmn" xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI" xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC" xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI" targetNamespace="http://www.flowable.org/casedef" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <case id="iee3" name="iee3" flowable:initiatorVariableName="initiator">
+    <casePlanModel id="flexCase" name="Flex case" flowable:formFieldValidation="true">
+      <planItem id="planItem2" name="healthcareSubmission" definitionRef="healthcareSubmissionStage">
+        <entryCriterion id="healthcareSentry" sentryRef="sentry1"></entryCriterion>
+      </planItem>
+      <planItem id="planItem4" name="energySubmission" definitionRef="energySubmissionStage">
+        <entryCriterion id="energySentry" sentryRef="sentry2"></entryCriterion>
+      </planItem>
+      <planItem id="planItem6" name="foodSubmission" definitionRef="foodSubmissionStage">
+        <entryCriterion id="foodSentry" sentryRef="sentry3"></entryCriterion>
+      </planItem>
+      <planItem id="planItem7" name="varEventGW" definitionRef="varEventGW">
+        <itemControl>
+          <repetitionRule flowable:counterVariable="repetitionCounter">
+            <extensionElements></extensionElements>
+          </repetitionRule>
+        </itemControl>
+      </planItem>
+      <planItem id="planItem9" name="applicationEntry" definitionRef="applicationEntry"></planItem>
+      <sentry id="sentry1" name="healthcareSentry" flowable:triggerMode="onEvent">
+        <planItemOnPart id="sentryOnPart1" sourceRef="planItem8">
+          <standardEvent>complete</standardEvent>
+        </planItemOnPart>
+        <ifPart>
+          <condition><![CDATA[${benefitProgramName == 'healthcare'}]]></condition>
+        </ifPart>
+      </sentry>
+      <sentry id="sentry2" name="energySentry" flowable:triggerMode="onEvent">
+        <planItemOnPart id="sentryOnPart2" sourceRef="planItem8">
+          <standardEvent>complete</standardEvent>
+        </planItemOnPart>
+        <ifPart>
+          <condition><![CDATA[${benefitProgramName == 'energy'}]]></condition>
+        </ifPart>
+      </sentry>
+      <sentry id="sentry3" name="foodSentry" flowable:triggerMode="onEvent">
+        <planItemOnPart id="sentryOnPart3" sourceRef="planItem8">
+          <standardEvent>complete</standardEvent>
+        </planItemOnPart>
+        <ifPart>
+          <condition><![CDATA[${benefitProgramName == 'food'}]]></condition>
+        </ifPart>
+      </sentry>
+      <sentry id="sentry4">
+        <planItemOnPart id="sentryOnPart4" sourceRef="planItem7">
+          <standardEvent>occur</standardEvent>
+        </planItemOnPart>
+      </sentry>
+      <stage id="healthcareSubmissionStage" name="healthcareSubmission">
+        <planItem id="planItem1" name="healthcareSvc" definitionRef="healthcareSvc"></planItem>
+        <task id="healthcareSvc" name="healthcareSvc" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;Healthcare&quot;)}" flowable:resultVariableName="eligibilityResponse"></task>
+      </stage>
+      <stage id="energySubmissionStage" name="energySubmission">
+        <planItem id="planItem3" name="energySvc" definitionRef="energySvc"></planItem>
+        <humanTask id="energySvc" name="energySvc" flowable:formFieldValidation="true"></humanTask>
+      </stage>
+      <stage id="foodSubmissionStage" name="foodSubmission">
+        <planItem id="planItem5" name="foodSvc" definitionRef="foodSvc"></planItem>
+        <task id="foodSvc" name="foodSvc" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;Food&quot;)}" flowable:resultVariableName="eligibilityResponse"></task>
+      </stage>
+      <eventListener id="varEventGW" name="varEventGW" flowable:eventType="variable" flowable:variableName="eligibilityResponse" flowable:variableChangeType="all"></eventListener>
+      <stage id="applicationEntry" name="applicationEntry">
+        <planItem id="planItem8" name="assessApplications" definitionRef="assessApplications"></planItem>
+        <humanTask id="assessApplications" name="assessApplications" flowable:formFieldValidation="true"></humanTask>
+      </stage>
+      <exitCriterion id="sid-C2CC12A1-3B0B-4656-984E-4A05F010CADD" sentryRef="sentry4"></exitCriterion>
+    </casePlanModel>
+  </case>
+  <cmmndi:CMMNDI>
+    <cmmndi:CMMNDiagram id="CMMNDiagram_iee3">
+      <cmmndi:CMMNShape id="CMMNShape_flexCase" cmmnElementRef="flexCase">
+        <dc:Bounds height="714.0" width="718.0" x="30.0" y="30.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_sid-C2CC12A1-3B0B-4656-984E-4A05F010CADD" cmmnElementRef="sid-C2CC12A1-3B0B-4656-984E-4A05F010CADD">
+        <dc:Bounds height="22.0" width="14.0" x="741.9925727682214" y="331.8783476272932"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem2" cmmnElementRef="planItem2">
+        <dc:Bounds height="137.0" width="437.0" x="266.0" y="139.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_healthcareSentry" cmmnElementRef="healthcareSentry">
+        <dc:Bounds height="22.0" width="14.0" x="259.0" y="196.01418439716312"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem1" cmmnElementRef="planItem1">
+        <dc:Bounds height="49.0" width="122.0" x="288.5" y="164.8046452468866"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem4" cmmnElementRef="planItem4">
+        <dc:Bounds height="97.0" width="345.0" x="214.0" y="300.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_energySentry" cmmnElementRef="energySentry">
+        <dc:Bounds height="22.0" width="14.0" x="206.0" y="336.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem3" cmmnElementRef="planItem3">
+        <dc:Bounds height="49.0" width="122.0" x="244.0" y="324.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem6" cmmnElementRef="planItem6">
+        <dc:Bounds height="100.0" width="446.0" x="210.0" y="420.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_foodSentry" cmmnElementRef="foodSentry">
+        <dc:Bounds height="22.0" width="14.0" x="202.0" y="459.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem5" cmmnElementRef="planItem5">
+        <dc:Bounds height="49.0" width="122.0" x="240.0" y="450.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem7" cmmnElementRef="planItem7">
+        <dc:Bounds height="30.0" width="30.0" x="645.0" y="318.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem9" cmmnElementRef="planItem9">
+        <dc:Bounds height="93.0" width="190.0" x="45.0" y="45.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem8" cmmnElementRef="planItem8">
+        <dc:Bounds height="57.0" width="137.0" x="71.5" y="63.0"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNEdge id="CMMNEdge_toEnergySentry" cmmnElementRef="planItem8" targetCMMNElementRef="energySentry">
+        <di:extension>
+          <flowable:docker type="source" x="68.5" y="28.5"></flowable:docker>
+          <flowable:docker type="target" x="0.0" y="11.0"></flowable:docker>
+        </di:extension>
+        <di:waypoint x="147.34911937377692" y="119.94999999999999"></di:waypoint>
+        <di:waypoint x="206.0" y="346.958565238133"></di:waypoint>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNEdge>
+      <cmmndi:CMMNEdge id="CMMNEdge_toExitSentry" cmmnElementRef="sid-C2CC12A1-3B0B-4656-984E-4A05F010CADD" targetCMMNElementRef="planItem7">
+        <di:extension>
+          <flowable:docker type="source" x="8.0" y="10.0"></flowable:docker>
+          <flowable:docker type="target" x="15.0" y="15.0"></flowable:docker>
+        </di:extension>
+        <di:waypoint x="743.0618469759376" y="341.19479197946373"></di:waypoint>
+        <di:waypoint x="674.875170737426" y="334.4678945777317"></di:waypoint>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNEdge>
+      <cmmndi:CMMNEdge id="CMMNEdge_toHealthcareSentry" cmmnElementRef="planItem8" targetCMMNElementRef="healthcareSentry">
+        <di:extension>
+          <flowable:docker type="source" x="68.5" y="28.5"></flowable:docker>
+          <flowable:docker type="target" x="7.0" y="0.0"></flowable:docker>
+        </di:extension>
+        <di:waypoint x="174.29589701937456" y="119.94999999999999"></di:waypoint>
+        <di:waypoint x="265.99645030069456" y="196.01418439716312"></di:waypoint>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNEdge>
+      <cmmndi:CMMNEdge id="CMMNEdge_toFoodSentry" cmmnElementRef="planItem8" targetCMMNElementRef="foodSentry">
+        <di:extension>
+          <flowable:docker type="source" x="68.5" y="28.5"></flowable:docker>
+          <flowable:docker type="target" x="0.0" y="11.0"></flowable:docker>
+        </di:extension>
+        <di:waypoint x="144.66023778071332" y="119.94999999999999"></di:waypoint>
+        <di:waypoint x="202.0" y="469.94776287360463"></di:waypoint>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNEdge>
+    </cmmndi:CMMNDiagram>
+  </cmmndi:CMMNDI>
+</definitions>

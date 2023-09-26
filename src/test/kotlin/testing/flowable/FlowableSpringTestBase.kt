@@ -7,7 +7,13 @@ import org.flowable.cmmn.api.CmmnManagementService
 import org.flowable.cmmn.api.CmmnRepositoryService
 import org.flowable.cmmn.api.CmmnRuntimeService
 import org.flowable.cmmn.api.CmmnTaskService
+import org.flowable.cmmn.api.history.HistoricPlanItemInstance
+import org.flowable.cmmn.api.runtime.CaseInstance
+import org.flowable.cmmn.engine.CmmnEngineConfiguration
+import org.flowable.cmmn.engine.impl.persistence.entity.SentryPartInstanceEntity
+import org.flowable.cmmn.engine.impl.util.CommandContextUtil
 import org.flowable.cmmn.spring.impl.test.FlowableCmmnSpringExtension
+import org.flowable.common.engine.impl.interceptor.Command
 import org.flowable.dmn.api.DmnDecisionService
 import org.flowable.dmn.api.DmnRepositoryService
 import org.flowable.dmn.engine.DmnEngine
@@ -27,6 +33,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+
+private val log = mu.KotlinLogging.logger {}
 
 @ExtendWith(SpringExtension::class)
 @ExtendWith(FlowableSpringExtension::class) // provides FlowableTestHelper
@@ -79,6 +87,9 @@ abstract class FlowableSpringTestBase {
     // CMMN
 
     @Autowired
+    lateinit var cmmnEngineConfiguration: CmmnEngineConfiguration
+
+    @Autowired
     lateinit var cmmnRepositoryService: CmmnRepositoryService
 
     @Autowired
@@ -108,13 +119,27 @@ abstract class FlowableSpringTestBase {
     fun startProcess(key: String, processVariables: VarValueMap = mapOf()): ProcessInstance =
         runtimeService.startProcessInstanceByKey(key, processVariables)
 
+    fun startCmmCase(key: String, processVariables: VarValueMap = mapOf()): CaseInstance =
+        cmmnRuntimeService.createCaseInstanceBuilder()
+            .caseDefinitionKey(key).variables(processVariables)
+            .start()
+
     fun getTask(taskKey: String): Task? =
         taskService.createTaskQuery().taskDefinitionKey(taskKey).singleResult()
 
     fun completeTask(taskKey: String, taskOutputVariables: VarValueMap = mapOf()) {
         with(getTask(taskKey)) {
             assertNotNull(this, "Cannot complete null task: $taskKey")
+            log.info("  Completing $taskKey")
             taskService.complete(id, taskOutputVariables)
+        }
+    }
+
+    fun completeCmmnTask(taskKey: String, taskOutputVariables: VarValueMap = mapOf()) {
+        with(getTask(taskKey)) {
+            assertNotNull(this, "Cannot complete null task: $taskKey")
+            log.info("  Completing $taskKey")
+            cmmnTaskService.complete(id, taskOutputVariables)
         }
     }
 
@@ -158,17 +183,98 @@ abstract class FlowableSpringTestBase {
             "Expecting $count process instances to have run"
         )
 
+    fun assertCmmnCaseNotComplete() =
+        assertNotEquals(0, cmmnRuntimeService.createCaseInstanceQuery().count())
+
+    fun assertCmmnCaseComplete() {
+//        val taskCount = taskService.createTaskQuery().count()
+//        assertEquals(0, taskCount, "Expecting no active tasks")
+
+        val caseCount = cmmnRuntimeService.createCaseInstanceQuery().count()
+        assertEquals(0, caseCount, "Expecting no active case instances")
+    }
+
+    fun assertCmmnCaseCount(count: Long = 1) =
+        assertEquals(
+            count,
+            cmmnHistoryService.createHistoricCaseInstanceQuery().count(),
+            "Expecting $count case instances to have run"
+        )
+
     // Activities include tasks and sequence flows
     fun assertActivitiesOccurred(expectedActivityIds: List<String>) {
         val activities = historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
         val activityIds = activities.map { it.activityId }
         assertEquals(expectedActivityIds, activityIds)
     }
-
     fun assertUserTasksOccurred(expectedUserTaskKeys: List<String>) {
         val userTasksRan = historyService.createHistoricTaskInstanceQuery().orderByHistoricTaskInstanceStartTime().asc().list()
         val userTaskKeys = userTasksRan.map { it.taskDefinitionKey }
         assertEquals(expectedUserTaskKeys, userTaskKeys)
+    }
+
+    fun assertCmmnMilestonesOccurred(expectedMilestoneIds: List<String>) {
+        val milestones = cmmnHistoryService.createHistoricMilestoneInstanceQuery().orderByTimeStamp().asc().list()
+        val milestoneIds = milestones.map { it.elementId }
+        assertEquals(expectedMilestoneIds, milestoneIds)
+    }
+
+    fun assertCmmnActiveUserTasks(caseInstance: CaseInstance, vararg expectedUserTaskKeys: String) {
+        val activeUserTasks = cmmnTaskService.createTaskQuery().caseInstanceId(caseInstance.id).orderByTaskCreateTime().asc().list()
+        val userTaskKeys = activeUserTasks.map { it.taskDefinitionKey }
+        log.info("  userTaskKeys: $userTaskKeys")
+        assertEquals(expectedUserTaskKeys.toList(), userTaskKeys)
+    }
+
+    fun assertPlanItems(expectedPlanItemCount: Int = -1): MutableList<HistoricPlanItemInstance> {
+        val items = cmmnHistoryService.createHistoricPlanItemInstanceQuery().orderByCreateTime().asc().list()
+        val itemIds = items.map { it.name }
+        log.info("  planItems: $itemIds")
+        if (expectedPlanItemCount >= 0) {
+            assertEquals(expectedPlanItemCount, items.size)
+        }
+        return items
+    }
+
+    fun assertPlanItemsExecuted(newPlanItemNames: List<String>, startupItems: MutableList<HistoricPlanItemInstance>): MutableList<HistoricPlanItemInstance> {
+        val items = assertPlanItems()
+        startupItems.forEach { removePlanItem(items, it) }
+        val itemIds = items.map { it.name }
+        assertEquals(newPlanItemNames, itemIds)
+        return items
+    }
+
+    private fun removePlanItem(
+        items: MutableList<HistoricPlanItemInstance>,
+        item: HistoricPlanItemInstance
+    ) {
+        val foundItem = items.find {
+            it.name == item.name &&
+                it.elementId == item.elementId &&
+                it.caseInstanceId == item.caseInstanceId &&
+                it.caseDefinitionId == item.caseDefinitionId &&
+                it.derivedCaseDefinitionId == item.derivedCaseDefinitionId &&
+                it.isStage == item.isStage &&
+                it.stageInstanceId == item.stageInstanceId &&
+                it.planItemDefinitionId == item.planItemDefinitionId &&
+                it.planItemDefinitionType == item.planItemDefinitionType &&
+                it.createTime == item.createTime
+        }
+        if (foundItem == null) {
+            log.warn("Couldn't find ${item.name}")
+        } else {
+            items.remove(foundItem)
+        }
+    }
+
+    // Copied from https://github.com/flowable/flowable-engine/blob/0052eb63aee1d831c3a527c2c64c96cbae7a4eaa/modules/flowable-cmmn-engine/src/test/java/org/flowable/cmmn/test/sentry/TriggerModeSentryTest.java#L124
+    fun assertSentryPartInstanceCount(caseInstance: CaseInstance, expectedCount: Int) {
+        val sentryPartInstanceEntities = cmmnEngineConfiguration.commandExecutor.execute {
+            CommandContextUtil.getSentryPartInstanceEntityManager(it)
+                .findSentryPartInstancesByCaseInstanceId(caseInstance.id)
+        }
+        log.info("  sentryPart: " + sentryPartInstanceEntities.map { it.planItemInstanceId })
+        assertEquals(expectedCount, sentryPartInstanceEntities.size)
     }
 }
 
