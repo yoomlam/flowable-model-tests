@@ -1,0 +1,130 @@
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="definition_c9992d46-5e44-11ee-95d0-0242ac110002" name="healthcareDecisionTable" namespace="http://www.flowable.org/dmn" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <decision id="healthcareDecisionTableAdults" name="healthcareDecisionTable">
+    <decisionTable id="decisionTable_f17c1213-2f09-401b-9c7b-73bbbb454baa" hitPolicy="FIRST">
+      <input label="household_size">
+        <inputExpression id="inputExpression_e0c9f921-3d12-4495-9cc8-6a120bfa053b" typeRef="number">
+          <text>household_size</text>
+        </inputExpression>
+      </input>
+      <input label="monthly_income_in_cents">
+        <inputExpression id="inputExpression_b0331465-dc2b-4f06-b10b-f999e0a51003" typeRef="number">
+          <text>monthly_income_in_cents</text>
+        </inputExpression>
+      </input>
+      <output id="outputExpression_ac7abe10-6f0a-453a-b3b5-6b34cc51e646" label="medicaid_for_adults" name="medicaid_for_adults" typeRef="boolean"></output>
+      <rule>
+        <inputEntry id="inputEntry_e0c9f921-3d12-4495-9cc8-6a120bfa053b_1">
+          <text><![CDATA[== 1]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_b0331465-dc2b-4f06-b10b-f999e0a51003_1">
+          <text><![CDATA[<= 167675]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_ac7abe10-6f0a-453a-b3b5-6b34cc51e646_1">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_e0c9f921-3d12-4495-9cc8-6a120bfa053b_2">
+          <text><![CDATA[== 2]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_b0331465-dc2b-4f06-b10b-f999e0a51003_2">
+          <text><![CDATA[<= 226820]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_ac7abe10-6f0a-453a-b3b5-6b34cc51e646_2">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_e0c9f921-3d12-4495-9cc8-6a120bfa053b_3">
+          <text><![CDATA[== 3]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_b0331465-dc2b-4f06-b10b-f999e0a51003_3">
+          <text><![CDATA[<= 285960]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_ac7abe10-6f0a-453a-b3b5-6b34cc51e646_3">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_e0c9f921-3d12-4495-9cc8-6a120bfa053b_4">
+          <text><![CDATA[== 4]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_b0331465-dc2b-4f06-b10b-f999e0a51003_4">
+          <text><![CDATA[<= 345000]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_ac7abe10-6f0a-453a-b3b5-6b34cc51e646_4">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+
+      <rule>
+        <inputEntry id="inputEntry_20c9f921-3d12-4495-9cc8-6a120bfa053b_5">
+          <text><![CDATA[== 5]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_20331465-dc2b-4f06-b10b-f999e0a51003_5">
+          <text><![CDATA[<= 404145]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_207abe10-6f0a-453a-b3b5-6b34cc51e646_5">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_20c9f921-3d12-4495-9cc8-6a120bfa053b_6">
+          <text><![CDATA[== 6]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_20331465-dc2b-4f06-b10b-f999e0a51003_6">
+          <text><![CDATA[<= 463285]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_207abe10-6f0a-453a-b3b5-6b34cc51e646_6">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_20c9f921-3d12-4495-9cc8-6a120bfa053b_7">
+          <text><![CDATA[== 7]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_20331465-dc2b-4f06-b10b-f999e0a51003_7">
+          <text><![CDATA[<= 522425]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_207abe10-6f0a-453a-b3b5-6b34cc51e646_7">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_20c9f921-3d12-4495-9cc8-6a120bfa053b_8">
+          <text><![CDATA[== 8]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_20331465-dc2b-4f06-b10b-f999e0a51003_8">
+          <text><![CDATA[<= 581470]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_207abe10-6f0a-453a-b3b5-6b34cc51e646_8">
+          <text><![CDATA[true]]></text>
+        </outputEntry>
+      </rule>
+
+      <rule>
+        <inputEntry id="inputEntry_e0c9f921-3d12-4495-9cc8-6a120bfa053b_9">
+          <text><![CDATA[<= 8]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_b0331465-dc2b-4f06-b10b-f999e0a51003_9">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_ac7abe10-6f0a-453a-b3b5-6b34cc51e646_9">
+          <text><![CDATA[false]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_e0c9f921-3d12-4495-9cc8-6a120bfa053b_10">
+          <text><![CDATA[> 8]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_b0331465-dc2b-4f06-b10b-f999e0a51003_10">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_ac7abe10-6f0a-453a-b3b5-6b34cc51e646_10">
+          <text><![CDATA[-]]></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI></dmndi:DMNDI>
+</definitions>

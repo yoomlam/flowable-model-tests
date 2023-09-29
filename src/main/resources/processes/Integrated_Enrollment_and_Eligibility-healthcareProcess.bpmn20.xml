@@ -1,66 +1,145 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
   <process id="integratedEnrollmentAndEligibilityHealthcareProcess" name="Integrated Enrollment and Eligibility-healthcareProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
-    <serviceTask id="checkHealthcareEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
+    <startEvent id="healthcareApplicationSubmitted" name="Healthcare application submitted" flowable:initiator="initiator" flowable:formFieldValidation="true"></startEvent>
+    <endEvent id="endEvent"></endEvent>
+    <serviceTask id="adultsDT" name="adultsDT" flowable:type="dmn">
       <extensionElements>
-        <flowable:field name="requestMethod">
-          <flowable:string><![CDATA[POST]]></flowable:string>
+        <flowable:field name="decisionTableReferenceKey">
+          <flowable:string><![CDATA[healthcareDecisionTableAdults]]></flowable:string>
         </flowable:field>
-        <flowable:field name="requestUrl">
-          <flowable:string><![CDATA[http://localhost:3456/api/eligibility/healthcare]]></flowable:string>
-        </flowable:field>
-        <flowable:field name="requestHeaders">
-          <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
-        </flowable:field>
-        <flowable:field name="requestBody">
-          <flowable:expression><![CDATA[{"monthly_income_in_cents":${applicationIncome},"household_size":${householdSize}}]]></flowable:expression>
-        </flowable:field>
-        <flowable:field name="disallowRedirects">
+        <flowable:field name="decisionTaskThrowErrorOnNoHits">
           <flowable:string><![CDATA[false]]></flowable:string>
         </flowable:field>
-        <flowable:field name="responseVariableName">
-          <flowable:string><![CDATA[eligibilityResponse]]></flowable:string>
-        </flowable:field>
-        <flowable:field name="ignoreException">
+        <flowable:field name="fallbackToDefaultTenant">
           <flowable:string><![CDATA[false]]></flowable:string>
         </flowable:field>
-        <flowable:field name="saveRequestVariables">
+        <flowable:field name="sameDeployment">
           <flowable:string><![CDATA[false]]></flowable:string>
-        </flowable:field>
-        <flowable:field name="saveResponseParameters">
-          <flowable:string><![CDATA[false]]></flowable:string>
-        </flowable:field>
-        <flowable:field name="saveResponseParametersTransient">
-          <flowable:string><![CDATA[false]]></flowable:string>
-        </flowable:field>
-        <flowable:field name="saveResponseVariableAsJson">
-          <flowable:string><![CDATA[true]]></flowable:string>
         </flowable:field>
       </extensionElements>
     </serviceTask>
-    <startEvent id="healthcareApplicationSubmitted" name="Healthcare application submitted" flowable:initiator="initiator" flowable:formFieldValidation="true"></startEvent>
-    <sequenceFlow id="withApplication" sourceRef="healthcareApplicationSubmitted" targetRef="checkHealthcareEligibility"></sequenceFlow>
-    <endEvent id="sid-EB16787F-8621-4579-9E3A-0C7511B72161"></endEvent>
-    <sequenceFlow id="withHealthcareApiResponse" sourceRef="checkHealthcareEligibility" targetRef="sid-EB16787F-8621-4579-9E3A-0C7511B72161"></sequenceFlow>
+    <serviceTask id="pregWomenDT" name="pregWomenDT" flowable:type="dmn">
+      <extensionElements>
+        <flowable:field name="decisionTableReferenceKey">
+          <flowable:string><![CDATA[healthcareDecisionTablePregWomen]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="decisionTaskThrowErrorOnNoHits">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="fallbackToDefaultTenant">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="sameDeployment">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+    <parallelGateway id="splitGW"></parallelGateway>
+    <sequenceFlow id="withApplication" sourceRef="healthcareApplicationSubmitted" targetRef="splitGW"></sequenceFlow>
+    <sequenceFlow id="toAdultsDT" sourceRef="splitGW" targetRef="adultsDT"></sequenceFlow>
+    <parallelGateway id="joinGW"></parallelGateway>
+    <sequenceFlow id="fromAdultsDT" sourceRef="adultsDT" targetRef="joinGW"></sequenceFlow>
+    <serviceTask id="eligibilityDecisionTable" name="eligibilityDecisionTable" flowable:type="dmn">
+      <extensionElements>
+        <flowable:field name="decisionTableReferenceKey">
+          <flowable:string><![CDATA[eligibilityDecisionTable]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="decisionTaskThrowErrorOnNoHits">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="fallbackToDefaultTenant">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="sameDeployment">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="toEligDT" sourceRef="joinGW" targetRef="eligibilityDecisionTable"></sequenceFlow>
+    <sequenceFlow id="withEligibilityResult" sourceRef="eligibilityDecisionTable" targetRef="endEvent"></sequenceFlow>
+    <serviceTask id="childrenDT" name="childrenDT" flowable:type="dmn">
+      <extensionElements>
+        <flowable:field name="decisionTableReferenceKey">
+          <flowable:string><![CDATA[healthcareDecisionTableChildren]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="decisionTaskThrowErrorOnNoHits">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="fallbackToDefaultTenant">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="sameDeployment">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="toPregWomenDT" sourceRef="splitGW" targetRef="pregWomenDT"></sequenceFlow>
+    <sequenceFlow id="fromPregWomenDT" sourceRef="pregWomenDT" targetRef="joinGW"></sequenceFlow>
+    <sequenceFlow id="toChildrenDT" sourceRef="splitGW" targetRef="childrenDT"></sequenceFlow>
+    <sequenceFlow id="fromChildrenDT" sourceRef="childrenDT" targetRef="joinGW"></sequenceFlow>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityHealthcareProcess">
-    <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityHealthcareProcess" id="BPMNPlane_integratedEnrollmentAndEligibilityHealthcareProcess">
-      <bpmndi:BPMNShape bpmnElement="checkHealthcareEligibility" id="BPMNShape_checkHealthcareEligibility">
-        <omgdc:Bounds height="80.0" width="100.0" x="565.0" y="42.599999999999966"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityHealthcareProcess2">
+    <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityHealthcareProcess2" id="BPMNPlane_integratedEnrollmentAndEligibilityHealthcareProcess2">
       <bpmndi:BPMNShape bpmnElement="healthcareApplicationSubmitted" id="BPMNShape_healthcareApplicationSubmitted">
-        <omgdc:Bounds height="30.0" width="30.0" x="420.0" y="67.59999999999997"></omgdc:Bounds>
+        <omgdc:Bounds height="30.0" width="30.0" x="105.0" y="198.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="sid-EB16787F-8621-4579-9E3A-0C7511B72161" id="BPMNShape_sid-EB16787F-8621-4579-9E3A-0C7511B72161">
-        <omgdc:Bounds height="28.0" width="28.0" x="735.0" y="68.59999999999997"></omgdc:Bounds>
+      <bpmndi:BPMNShape bpmnElement="endEvent" id="BPMNShape_endEvent">
+        <omgdc:Bounds height="28.0" width="28.0" x="780.0" y="199.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="withApplication" id="BPMNEdge_withApplication" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
-        <omgdi:waypoint x="449.949999435861" y="82.59999999999997"></omgdi:waypoint>
-        <omgdi:waypoint x="565.0" y="82.59999999999997"></omgdi:waypoint>
+      <bpmndi:BPMNShape bpmnElement="adultsDT" id="BPMNShape_adultsDT">
+        <omgdc:Bounds height="80.0" width="100.0" x="345.0" y="105.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="pregWomenDT" id="BPMNShape_pregWomenDT">
+        <omgdc:Bounds height="80.0" width="100.0" x="345.0" y="210.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="splitGW" id="BPMNShape_splitGW">
+        <omgdc:Bounds height="40.0" width="40.0" x="255.0" y="192.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="joinGW" id="BPMNShape_joinGW">
+        <omgdc:Bounds height="40.0" width="40.0" x="510.0" y="192.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="eligibilityDecisionTable" id="BPMNShape_eligibilityDecisionTable">
+        <omgdc:Bounds height="80.0" width="100.0" x="615.0" y="173.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="childrenDT" id="BPMNShape_childrenDT">
+        <omgdc:Bounds height="80.0" width="100.0" x="345.0" y="315.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="fromPregWomenDT" id="BPMNEdge_fromPregWomenDT" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="444.95000000000005" y="235.92592592592592"></omgdi:waypoint>
+        <omgdi:waypoint x="514.393063583815" y="216.3820809248555"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="withHealthcareApiResponse" id="BPMNEdge_withHealthcareApiResponse" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
-        <omgdi:waypoint x="664.9499999999999" y="82.59999999999997"></omgdi:waypoint>
-        <omgdi:waypoint x="735.0" y="82.59999999999997"></omgdi:waypoint>
+      <bpmndi:BPMNEdge bpmnElement="withEligibilityResult" id="BPMNEdge_withEligibilityResult" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="714.949999999939" y="213.0"></omgdi:waypoint>
+        <omgdi:waypoint x="780.0" y="213.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="fromChildrenDT" id="BPMNEdge_fromChildrenDT" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="432.71503496503493" y="315.0"></omgdi:waypoint>
+        <omgdi:waypoint x="520.2877697841726" y="222.26205035971225"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="fromAdultsDT" id="BPMNEdge_fromAdultsDT" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="444.95000000000005" y="169.79000000000002"></omgdi:waypoint>
+        <omgdi:waypoint x="516.6185056902523" y="205.36633663366337"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="withApplication" id="BPMNEdge_withApplication" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="134.94969538932565" y="212.90322777825418"></omgdi:waypoint>
+        <omgdi:waypoint x="255.12820512820508" y="212.1278846153846"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="toAdultsDT" id="BPMNEdge_toAdultsDT" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="287.8021390374331" y="204.8342245989305"></omgdi:waypoint>
+        <omgdi:waypoint x="344.99999999999994" y="172.88875000000002"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="toEligDT" id="BPMNEdge_toEligDT" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="549.7960874357091" y="212.14669117647054"></omgdi:waypoint>
+        <omgdi:waypoint x="614.9999999999977" y="212.62962962962962"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="toPregWomenDT" id="BPMNEdge_toPregWomenDT" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="290.148624288425" y="216.79810126582282"></omgdi:waypoint>
+        <omgdi:waypoint x="345.0" y="234.16666666666666"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="toChildrenDT" id="BPMNEdge_toChildrenDT" flowable:sourceDockerX="20.5" flowable:sourceDockerY="20.5" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="284.14322519083964" y="222.8064574589851"></omgdi:waypoint>
+        <omgdi:waypoint x="361.4561403508772" y="315.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

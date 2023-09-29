@@ -1,0 +1,79 @@
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="definition_f267e0fe-5e51-11ee-ac45-0242ac110002" name="eligibilityDecisionTable" namespace="http://www.flowable.org/dmn" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <decision id="eligibilityDecisionTable" name="eligibilityDecisionTable">
+    <decisionTable id="decisionTable_87cb61b6-b8d4-4ea1-be27-be9f12b21f54" hitPolicy="FIRST">
+      <input label="medicaid_for_adults">
+        <inputExpression id="inputExpression_dca62a09-75b5-4efe-adaa-df289c6b60b2" typeRef="boolean">
+          <text>medicaid_for_adults</text>
+        </inputExpression>
+      </input>
+      <input label="children_under_19">
+        <inputExpression id="inputExpression_fcaac0df-2840-4146-bbd6-dd2527618f1a" typeRef="boolean">
+          <text>children_under_19</text>
+        </inputExpression>
+      </input>
+      <input label="pregnant_women">
+        <inputExpression id="inputExpression_ab19edd6-617a-41d2-bde0-090e65646793" typeRef="boolean">
+          <text>pregnant_women</text>
+        </inputExpression>
+      </input>
+      <output id="outputExpression_d230ec8b-c6a8-4c82-a053-a54c6758926f" label="eligibility_result" name="eligibility_result" typeRef="string"></output>
+      <rule>
+        <inputEntry id="inputEntry_dca62a09-75b5-4efe-adaa-df289c6b60b2_1">
+          <text><![CDATA[== true]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_fcaac0df-2840-4146-bbd6-dd2527618f1a_1">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_ab19edd6-617a-41d2-bde0-090e65646793_1">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_d230ec8b-c6a8-4c82-a053-a54c6758926f_1">
+          <text><![CDATA["Adults"]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_dca62a09-75b5-4efe-adaa-df289c6b60b2_2">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_fcaac0df-2840-4146-bbd6-dd2527618f1a_2">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_ab19edd6-617a-41d2-bde0-090e65646793_2">
+          <text><![CDATA[== true]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_d230ec8b-c6a8-4c82-a053-a54c6758926f_2">
+          <text><![CDATA["PregnantWomen"]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_dca62a09-75b5-4efe-adaa-df289c6b60b2_3">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_fcaac0df-2840-4146-bbd6-dd2527618f1a_3">
+          <text><![CDATA[== true]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_ab19edd6-617a-41d2-bde0-090e65646793_3">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_d230ec8b-c6a8-4c82-a053-a54c6758926f_3">
+          <text><![CDATA["ChildrenUnder19"]]></text>
+        </outputEntry>
+      </rule>
+      <rule>
+        <inputEntry id="inputEntry_dca62a09-75b5-4efe-adaa-df289c6b60b2_4">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_fcaac0df-2840-4146-bbd6-dd2527618f1a_4">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry_ab19edd6-617a-41d2-bde0-090e65646793_4">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry_d230ec8b-c6a8-4c82-a053-a54c6758926f_4">
+          <text><![CDATA["NotEligible"]]></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI></dmndi:DMNDI>
+</definitions>

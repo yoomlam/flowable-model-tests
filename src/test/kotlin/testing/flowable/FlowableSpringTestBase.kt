@@ -21,6 +21,7 @@ import org.flowable.engine.ProcessEngine
 import org.flowable.engine.RepositoryService
 import org.flowable.engine.RuntimeService
 import org.flowable.engine.TaskService
+import org.flowable.engine.history.HistoricActivityInstance
 import org.flowable.engine.runtime.ProcessInstance
 import org.flowable.spring.impl.test.FlowableSpringExtension
 import org.flowable.task.api.Task
@@ -207,10 +208,14 @@ abstract class FlowableSpringTestBase {
 
     // Activities include tasks and sequence flows
     fun assertActivitiesOccurred(expectedActivityIds: List<String>) {
-        val activities = historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
+        val activities = getActivitiesOccurred()
         val activityIds = activities.map { it.activityId }
         assertEquals(expectedActivityIds, activityIds)
     }
+
+    fun getActivitiesOccurred(): MutableList<HistoricActivityInstance> =
+        historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
+
     fun assertUserTasksOccurred(expectedUserTaskKeys: List<String>) {
         val userTasksRan = historyService.createHistoricTaskInstanceQuery().orderByHistoricTaskInstanceStartTime().asc().list()
         val userTaskKeys = userTasksRan.map { it.taskDefinitionKey }

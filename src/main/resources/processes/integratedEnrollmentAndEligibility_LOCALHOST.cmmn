@@ -118,9 +118,10 @@
           <extensionElements>
             <flowable:in source="applicationId" target="applicationId"></flowable:in>
             <flowable:in source="benefitProgramName" target="benefitProgramName"></flowable:in>
-            <flowable:in source="applicationIncome" target="applicationIncome"></flowable:in>
-            <flowable:in source="householdSize" target="householdSize"></flowable:in>
-            <flowable:out source="eligibilityResponse" sourceExpression="${eligibilityResponse.eligibility_result == 'Eligible' ? 'passed' : 'failed'}"
+            <flowable:in source="applicationIncome" target="monthly_income_in_cents"></flowable:in>
+            <flowable:in source="householdSize" target="household_size"></flowable:in>
+            <flowable:out source="eligibility_result"
+              sourceExpression="${eligibility_result == 'NotEligible' ? 'failed' : 'passed' }"
               target="assessmentResult" ></flowable:out>
           </extensionElements>
           <processRefExpression><![CDATA[integratedEnrollmentAndEligibilityHealthcareProcess]]></processRefExpression>

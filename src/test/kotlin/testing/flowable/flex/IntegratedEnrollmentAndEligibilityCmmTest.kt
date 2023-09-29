@@ -3,6 +3,7 @@ package testing.flowable.flex
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import org.flowable.cmmn.engine.test.CmmnDeployment
+import org.flowable.dmn.engine.test.DmnDeployment
 import org.flowable.engine.test.Deployment
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -138,6 +139,14 @@ class IntegratedEnrollmentAndEligibilityCmmTest : FlowableSpringTestBase() {
         resources = [
             "processes/Integrated_Enrollment_and_Eligibility-healthcareProcess.bpmn20.xml",
             "processes/Integrated_Enrollment_and_Eligibility-approvalProcess.bpmn20.xml"
+        ]
+    )
+    @DmnDeployment(
+        resources = [
+            "processes/healthcareDecisionTableAdults.dmn",
+            "processes/healthcareDecisionTablePregWomen.dmn",
+            "processes/healthcareDecisionTableChildren.dmn",
+            "processes/eligibilityDecisionTable.dmn"
         ]
     )
     fun healthcareProgram() {
