@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
-  <process id="integratedEnrollmentAndEligibilityFoodProcess" name="Integrated Enrollment and Eligibility-foodProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
+  <process id="ieeFoodProgramProcess" name="Integrated Enrollment and Eligibility-foodProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
     <userTask id="verifyIncome" name="Verifies income" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
     <serviceTask id="checkFoodEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
       <extensionElements>
@@ -58,8 +58,8 @@
     </sequenceFlow>
     <sequenceFlow id="withIncomeVerification" sourceRef="verifyIncome" targetRef="sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B"></sequenceFlow>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityFoodProcess">
-    <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityFoodProcess" id="BPMNPlane_integratedEnrollmentAndEligibilityFoodProcess">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ieeFoodProgramProcess">
+    <bpmndi:BPMNPlane bpmnElement="ieeFoodProgramProcess" id="BPMNPlane_ieeFoodProgramProcess">
       <bpmndi:BPMNShape bpmnElement="verifyIncome" id="BPMNShape_verifyIncome">
         <omgdc:Bounds height="80.0" width="100.0" x="690.0" y="120.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>

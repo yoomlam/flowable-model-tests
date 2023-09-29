@@ -13,15 +13,15 @@
       </planItem>
       <planItem id="planItemVarEventLstnr" name="varEventLnr" definitionRef="varEventLnr">
       </planItem>
-      <planItem id="planItemAppST" name="applicationEntry" definitionRef="applicationEntry"></planItem>
+      <planItem id="planItemAppST" name="Application Entry" definitionRef="applicationEntryStage"></planItem>
       <planItem id="planItemVarHandler" name="varHandler" definitionRef="varHandler">
-        <entryCriterion id="sid-E9712E4A-CA61-4845-9CF1-7F4CC516C6A9" sentryRef="sentry4"></entryCriterion>
+        <entryCriterion id="sid-E9712E4A-CA61-4845-9CF1-7F4CC516C6A9" sentryRef="sentryVarListener"></entryCriterion>
       </planItem>
       <planItem id="planItemFoodMS" name="food MS" definitionRef="foodMS">
-        <entryCriterion id="sid-BED758B0-1C49-4233-B204-4BCA0F9A43BD" sentryRef="sentry5"></entryCriterion>
+        <entryCriterion id="sid-BED758B0-1C49-4233-B204-4BCA0F9A43BD" sentryRef="sentryFoodMS"></entryCriterion>
       </planItem>
       <sentry id="sentryProgramHealthcare" name="healthcareSentry" flowable:triggerMode="onEvent">
-        <planItemOnPart id="sentryOnPart1" sourceRef="planItemAssessAppHT">
+        <planItemOnPart id="sentryOnPart1" sourceRef="planItemAssessAppHumanTask">
           <standardEvent>complete</standardEvent>
         </planItemOnPart>
         <ifPart>
@@ -37,19 +37,19 @@
         </ifPart>
       </sentry>
       <sentry id="sentryProgramFood" name="foodSentry" flowable:triggerMode="onEvent">
-        <planItemOnPart id="sentryOnPart3" sourceRef="planItemAssessAppHT">
+        <planItemOnPart id="sentryOnPart3" sourceRef="planItemAssessAppHumanTask">
           <standardEvent>complete</standardEvent>
         </planItemOnPart>
         <ifPart>
           <condition><![CDATA[${benefitProgramName == 'food'}]]></condition>
         </ifPart>
       </sentry>
-      <sentry id="sentry4" flowable:triggerMode="onEvent">
+      <sentry id="sentryVarListener" flowable:triggerMode="onEvent">
         <planItemOnPart id="sentryOnPart4" sourceRef="planItemVarEventLstnr">
           <standardEvent>occur</standardEvent>
         </planItemOnPart>
       </sentry>
-      <sentry id="sentry5">
+      <sentry id="sentryFoodMS">
         <planItemOnPart id="sentryOnPart5" sourceRef="planItemFoodST">
           <standardEvent>complete</standardEvent>
         </planItemOnPart>
@@ -60,20 +60,20 @@
         </planItemOnPart>
       </sentry>
       <stage id="healthcareSubmissionStage" name="healthcareSubmission">
-        <planItem id="planItem1" name="healthcareSvc" definitionRef="healthcareSvc"></planItem>
+        <planItem id="planItemHealthcareSvc" name="healthcareSvc" definitionRef="healthcareSvc"></planItem>
         <task id="healthcareSvc" name="healthcareSvc" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;Healthcare&quot;)}" flowable:resultVariableName="eligibilityResponse"></task>
       </stage>
       <stage id="energySubmissionStage" name="energySubmission">
-        <planItem id="planItem3" name="energySvc" definitionRef="energySvc"></planItem>
+        <planItem id="planItemEnergySvc" name="energySvc" definitionRef="energySvc"></planItem>
         <humanTask id="energySvc" name="energySvc" flowable:formFieldValidation="true"></humanTask>
       </stage>
       <stage id="foodSubmissionStage" name="foodSubmission">
-        <planItem id="planItem5" name="foodSvc" definitionRef="foodSvc"></planItem>
+        <planItem id="planItemFoodSvc" name="foodSvc" definitionRef="foodSvc"></planItem>
         <task id="foodSvc" name="foodSvc" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;Food&quot;)}" flowable:resultVariableName="eligibilityResponse"></task>
       </stage>
       <eventListener id="varEventLnr" name="varEventLnr" flowable:eventType="variable" flowable:variableName="eligibilityResponse" flowable:variableChangeType="all"></eventListener>
-      <stage id="applicationEntry" name="applicationEntry">
-        <planItem id="planItemAssessAppHT" name="assessApplications" definitionRef="assessApplications"></planItem>
+      <stage id="applicationEntryStage" name="applicationEntryStage">
+        <planItem id="planItemAssessAppHumanTask" name="assessApplications" definitionRef="assessApplications"></planItem>
         <humanTask id="assessApplications" name="assessApplications" flowable:formFieldValidation="true"></humanTask>
       </stage>
       <task id="varHandler" name="varHandler" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;Done&quot;)}"></task>
@@ -99,7 +99,7 @@
         <dc:Bounds height="22.0" width="14.0" x="259.0" y="196.0"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_planItem1" cmmnElementRef="planItem1">
+      <cmmndi:CMMNShape id="CMMNShape_planItemHealthcareSvc" cmmnElementRef="planItemHealthcareSvc">
         <dc:Bounds height="49.0" width="122.0" x="288.5" y="164.8046452468866"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
@@ -111,7 +111,7 @@
         <dc:Bounds height="22.0" width="14.0" x="202.44057971014493" y="334.0618556701031"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_planItem3" cmmnElementRef="planItem3">
+      <cmmndi:CMMNShape id="CMMNShape_planItemEnergySvc" cmmnElementRef="planItemEnergySvc">
         <dc:Bounds height="49.0" width="122.0" x="240.0" y="324.0"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
@@ -123,7 +123,7 @@
         <dc:Bounds height="22.0" width="14.0" x="202.49551569506727" y="458.0"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_planItem5" cmmnElementRef="planItem5">
+      <cmmndi:CMMNShape id="CMMNShape_planItemFoodSvc" cmmnElementRef="planItemFoodSvc">
         <dc:Bounds height="49.0" width="122.0" x="240.0" y="450.0"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
@@ -135,7 +135,7 @@
         <dc:Bounds height="127.0" width="190.0" x="45.0" y="45.0"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_planItemAssessAppHT" cmmnElementRef="planItemAssessAppHT">
+      <cmmndi:CMMNShape id="CMMNShape_planItemAssessAppHumanTask" cmmnElementRef="planItemAssessAppHumanTask">
         <dc:Bounds height="57.0" width="137.0" x="60.0" y="90.0"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
@@ -182,7 +182,7 @@
         <di:waypoint x="434.9499999999979" y="469.53327081287307"></di:waypoint>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNEdge>
-      <cmmndi:CMMNEdge id="CMMNEdge_toHealthcareSentry" cmmnElementRef="planItemAssessAppHT" targetCMMNElementRef="healthcareSentry">
+      <cmmndi:CMMNEdge id="CMMNEdge_toHealthcareSentry" cmmnElementRef="planItemAssessAppHumanTask" targetCMMNElementRef="healthcareSentry">
         <di:extension>
           <flowable:docker type="source" x="68.5" y="28.5"></flowable:docker>
           <flowable:docker type="target" x="7.0" y="0.0"></flowable:docker>
@@ -191,7 +191,7 @@
         <di:waypoint x="265.98978549540345" y="196.0"></di:waypoint>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNEdge>
-      <cmmndi:CMMNEdge id="CMMNEdge_toFoodSentry" cmmnElementRef="planItemAssessAppHT" targetCMMNElementRef="foodSentry">
+      <cmmndi:CMMNEdge id="CMMNEdge_toFoodSentry" cmmnElementRef="planItemAssessAppHumanTask" targetCMMNElementRef="foodSentry">
         <di:extension>
           <flowable:docker type="source" x="68.5" y="28.5"></flowable:docker>
           <flowable:docker type="target" x="0.0" y="11.0"></flowable:docker>

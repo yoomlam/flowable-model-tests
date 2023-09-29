@@ -17,14 +17,14 @@ import testing.flowable.wireMockExtension
 import kotlin.test.assertEquals
 
 @TestConfiguration
-private class IntegratedEnrollmentAndEligibilityCmmConfig {
+private class IeeCmmConfig {
     // `someService` is referenced in the CMM XML file
     @Bean
     fun someService(): TestService = TestService("in ${this::class.simpleName}")
 }
 
-@Import(IntegratedEnrollmentAndEligibilityCmmConfig::class)
-class IntegratedEnrollmentAndEligibilityCmmTest : FlowableSpringTestBase() {
+@Import(IeeCmmConfig::class)
+class IeeCmmTest : FlowableSpringTestBase() {
     companion object {
         const val applicationId = 20230919
 
@@ -70,19 +70,19 @@ class IntegratedEnrollmentAndEligibilityCmmTest : FlowableSpringTestBase() {
     )
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.cmmn"])
+    @CmmnDeployment(resources = ["processes/iee.cmmn"])
     @Deployment(
         resources = [
-            "processes/Integrated_Enrollment_and_Eligibility-healthcareProcess.bpmn20.xml",
-            "processes/Integrated_Enrollment_and_Eligibility-approvalProcess.bpmn20.xml"
+            "processes/iee-processHealthcare.bpmn",
+            "processes/iee-processApproval.bpmn"
         ]
     )
     @DmnDeployment(
         resources = [
-            "processes/healthcareDecisionTableAdults.dmn",
-            "processes/healthcareDecisionTablePregWomen.dmn",
-            "processes/healthcareDecisionTableChildren.dmn",
-            "processes/eligibilityDecisionTable.dmn"
+            "processes/iee-healthcareDecisionAdults.dmn",
+            "processes/iee-healthcareDecisionPregWomen.dmn",
+            "processes/iee-healthcareDecisionChildren.dmn",
+            "processes/iee-healthcareDecisionEligibility.dmn"
         ]
     )
     fun healthcareProgram() {
@@ -101,8 +101,8 @@ class IntegratedEnrollmentAndEligibilityCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.cmmn"])
-    @Deployment(resources = ["processes/Integrated_Enrollment_and_Eligibility-approvalProcess.bpmn20.xml"])
+    @CmmnDeployment(resources = ["processes/iee.cmmn"])
+    @Deployment(resources = ["processes/iee-processApproval.bpmn"])
     fun energyProgram() {
         val assessmentResultValue = "passed"
         stubResponses()
@@ -121,8 +121,8 @@ class IntegratedEnrollmentAndEligibilityCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.cmmn"])
-    @Deployment(resources = ["processes/Integrated_Enrollment_and_Eligibility-approvalProcess.bpmn20.xml"])
+    @CmmnDeployment(resources = ["processes/iee.cmmn"])
+    @Deployment(resources = ["processes/iee-processApproval.bpmn"])
     fun energyProgramFailed() {
         val assessmentResultValue = "failed"
         stubResponses()
@@ -140,11 +140,11 @@ class IntegratedEnrollmentAndEligibilityCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.cmmn"])
+    @CmmnDeployment(resources = ["processes/iee.cmmn"])
     @Deployment(
         resources = [
-            "processes/Integrated_Enrollment_and_Eligibility-foodProcess.bpmn20.xml",
-            "processes/Integrated_Enrollment_and_Eligibility-approvalProcess.bpmn20.xml"
+            "processes/iee-processFood.bpmn",
+            "processes/iee-processApproval.bpmn"
         ]
     )
     fun foodProgram() {
@@ -168,11 +168,11 @@ class IntegratedEnrollmentAndEligibilityCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.cmmn"])
+    @CmmnDeployment(resources = ["processes/iee.cmmn"])
     @Deployment(
         resources = [
-            "processes/Integrated_Enrollment_and_Eligibility-foodProcess.bpmn20.xml",
-            "processes/Integrated_Enrollment_and_Eligibility-approvalProcess.bpmn20.xml"
+            "processes/iee-processFood.bpmn",
+            "processes/iee-processApproval.bpmn"
         ]
     )
     fun foodProgramButIncomeNotVerified() {

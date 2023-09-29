@@ -11,17 +11,17 @@ import testing.flowable.simple.TestService
 import kotlin.test.assertEquals
 
 @TestConfiguration
-private class IeeBasicCmmConfig {
+private class BasicIeeCmmConfig {
     // `someService` is referenced in the CMM XML file
     @Bean
     fun someService(): TestService = TestService("in ${this::class.simpleName}")
 }
 
-@Import(IeeBasicCmmConfig::class)
-class IeeBasicCmmTest : FlowableSpringTestBase() {
+@Import(BasicIeeCmmConfig::class)
+class BasicIeeCmmTest : FlowableSpringTestBase() {
 
     @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/basicIee.cmmn"])
     fun healthcareProgram() {
         runToCompletion(
             "passed",
@@ -38,7 +38,7 @@ class IeeBasicCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/basicIee.cmmn"])
     fun energyProgram() {
         val assessmentResultValue = "passed"
         runToCompletion(
@@ -59,7 +59,7 @@ class IeeBasicCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/basicIee.cmmn"])
     fun energyProgramFailed() {
         val assessmentResultValue = "failed"
         runToCompletion(
@@ -80,7 +80,7 @@ class IeeBasicCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/basicIee.cmmn"])
     fun foodProgram() {
         runToCompletion(
             "passed",
@@ -105,7 +105,7 @@ class IeeBasicCmmTest : FlowableSpringTestBase() {
         expectedEventPlanItems: List<String>,
         expectedMilestones: List<String> = listOf()
     ) {
-        val caseInstance = startCmmCase("ieeBasic", processVariables)
+        val caseInstance = startCmmCase("basicIee", processVariables)
 
         assertCmmnPlanItems(4)
         assertCmmnActiveStage(listOf("submissionStage"))

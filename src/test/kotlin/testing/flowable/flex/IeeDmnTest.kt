@@ -8,10 +8,10 @@ import testing.flowable.FlowableSpringTestBase
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class IeeBasicDmnTest : FlowableSpringTestBase() {
+class IeeDmnTest : FlowableSpringTestBase() {
 
     @Test
-    @DmnDeployment(resources = ["processes/healthcareDecisionTableAdults.dmn"])
+    @DmnDeployment(resources = ["processes/iee-healthcareDecisionAdults.dmn"])
     fun healthcareAdultsDmnTest() {
         val executionResult = decisionService.createExecuteDecisionBuilder()
             .decisionKey("healthcareDecisionTableAdults")
@@ -29,18 +29,18 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @Deployment(resources = ["processes/Integrated_Enrollment_and_Eligibility-healthcareProcess.bpmn20.xml"])
+    @Deployment(resources = ["processes/iee-processHealthcare.bpmn"])
     @DmnDeployment(
         resources = [
-            "processes/healthcareDecisionTableAdults.dmn",
-            "processes/healthcareDecisionTablePregWomen.dmn",
-            "processes/healthcareDecisionTableChildren.dmn",
-            "processes/eligibilityDecisionTable.dmn"
+            "processes/iee-healthcareDecisionAdults.dmn",
+            "processes/iee-healthcareDecisionPregWomen.dmn",
+            "processes/iee-healthcareDecisionChildren.dmn",
+            "processes/iee-healthcareDecisionEligibility.dmn"
         ]
     )
     fun healthcareDmnResultEqualsAdultTest() {
         startProcess(
-            "integratedEnrollmentAndEligibilityHealthcareProcess",
+            "ieeHealthcareProgramProcess",
             mapOf(
                 "household_size" to "3",
                 "monthly_income_in_cents" to "270000"
@@ -59,18 +59,18 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @Deployment(resources = ["processes/Integrated_Enrollment_and_Eligibility-healthcareProcess.bpmn20.xml"])
+    @Deployment(resources = ["processes/iee-processHealthcare.bpmn"])
     @DmnDeployment(
         resources = [
-            "processes/healthcareDecisionTableAdults.dmn",
-            "processes/healthcareDecisionTablePregWomen.dmn",
-            "processes/healthcareDecisionTableChildren.dmn",
-            "processes/eligibilityDecisionTable.dmn"
+            "processes/iee-healthcareDecisionAdults.dmn",
+            "processes/iee-healthcareDecisionPregWomen.dmn",
+            "processes/iee-healthcareDecisionChildren.dmn",
+            "processes/iee-healthcareDecisionEligibility.dmn"
         ]
     )
     fun healthcareDmnResultEqualsPregWomanTest() {
         startProcess(
-            "integratedEnrollmentAndEligibilityHealthcareProcess",
+            "ieeHealthcareProgramProcess",
             mapOf(
                 "household_size" to "3",
                 "monthly_income_in_cents" to "350000"
@@ -89,18 +89,18 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @Deployment(resources = ["processes/Integrated_Enrollment_and_Eligibility-healthcareProcess.bpmn20.xml"])
+    @Deployment(resources = ["processes/iee-processHealthcare.bpmn"])
     @DmnDeployment(
         resources = [
-            "processes/healthcareDecisionTableAdults.dmn",
-            "processes/healthcareDecisionTablePregWomen.dmn",
-            "processes/healthcareDecisionTableChildren.dmn",
-            "processes/eligibilityDecisionTable.dmn"
+            "processes/iee-healthcareDecisionAdults.dmn",
+            "processes/iee-healthcareDecisionPregWomen.dmn",
+            "processes/iee-healthcareDecisionChildren.dmn",
+            "processes/iee-healthcareDecisionEligibility.dmn"
         ]
     )
     fun healthcareDmnResultEqualsChildrenTest() {
         startProcess(
-            "integratedEnrollmentAndEligibilityHealthcareProcess",
+            "ieeHealthcareProgramProcess",
             mapOf(
                 "household_size" to "3",
                 "monthly_income_in_cents" to "640000"
@@ -119,18 +119,18 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @Deployment(resources = ["processes/Integrated_Enrollment_and_Eligibility-healthcareProcess.bpmn20.xml"])
+    @Deployment(resources = ["processes/iee-processHealthcare.bpmn"])
     @DmnDeployment(
         resources = [
-            "processes/healthcareDecisionTableAdults.dmn",
-            "processes/healthcareDecisionTablePregWomen.dmn",
-            "processes/healthcareDecisionTableChildren.dmn",
-            "processes/eligibilityDecisionTable.dmn"
+            "processes/iee-healthcareDecisionAdults.dmn",
+            "processes/iee-healthcareDecisionPregWomen.dmn",
+            "processes/iee-healthcareDecisionChildren.dmn",
+            "processes/iee-healthcareDecisionEligibility.dmn"
         ]
     )
     fun healthcareDmnResultEqualsNotEligible() {
         startProcess(
-            "integratedEnrollmentAndEligibilityHealthcareProcess",
+            "ieeHealthcareProgramProcess",
             mapOf(
                 "household_size" to "3",
                 "monthly_income_in_cents" to "700000"

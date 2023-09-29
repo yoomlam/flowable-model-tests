@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flowable="http://flowable.org/cmmn" xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI" xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC" xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI" targetNamespace="http://www.flowable.org/casedef" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
-  <case id="ieeCMMN" name="ieeCMMN" flowable:initiatorVariableName="initiator">
+  <case id="basicIee" name="basicIee" flowable:initiatorVariableName="initiator">
     <casePlanModel id="flexCase" name="Flex case" flowable:formFieldValidation="true">
       <planItem id="planItem2" name="submission stage" definitionRef="submissionStage"></planItem>
       <planItem id="planItem7" name="decision stage" definitionRef="decisionStage">
@@ -31,71 +31,51 @@
         <humanTask id="assessApplications" name="assessApplications" flowable:formFieldValidation="true"></humanTask>
       </stage>
       <stage id="decisionStage" name="decision stage" autoComplete="true">
-        <planItem id="planItem3" name="approval sent" definitionRef="approvalSentMS">
-          <entryCriterion id="sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0" sentryRef="sentry1"></entryCriterion>
+        <planItem id="planItem3" name="approval process" definitionRef="approvalProcess">
+          <entryCriterion id="approvedResult" sentryRef="sentry1"></entryCriterion>
         </planItem>
-        <planItem id="planItem4" name="denial sent" definitionRef="denialSentMS">
-          <entryCriterion id="sid-93133357-5825-4664-9C1F-86F103301012" sentryRef="sentry2"></entryCriterion>
+        <planItem id="planItem4" name="denial process" definitionRef="denialProcess">
+          <entryCriterion id="deniedResult" sentryRef="sentry2"></entryCriterion>
         </planItem>
-        <planItem id="planItem5" name="Sends denial notification" definitionRef="sendDenialNotification">
-          <entryCriterion id="deniedResult" sentryRef="sentry3"></entryCriterion>
+        <planItem id="planItem5" name="approval sent" definitionRef="approvalSentMS">
+          <entryCriterion id="sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0" sentryRef="sentry3"></entryCriterion>
         </planItem>
-        <planItem id="planItem6" name="approval process" definitionRef="approvalProcess">
-          <entryCriterion id="approvedResult" sentryRef="sentry4"></entryCriterion>
+        <planItem id="planItem6" name="denial sent" definitionRef="denialSentMS">
+          <entryCriterion id="sid-93133357-5825-4664-9C1F-86F103301012" sentryRef="sentry4"></entryCriterion>
         </planItem>
-        <sentry id="sentry1">
-          <planItemOnPart id="sentryOnPart1" sourceRef="planItem6">
-            <standardEvent>complete</standardEvent>
-          </planItemOnPart>
-        </sentry>
-        <sentry id="sentry2">
-          <planItemOnPart id="sentryOnPart2" sourceRef="planItem5">
-            <standardEvent>complete</standardEvent>
-          </planItemOnPart>
-        </sentry>
-        <sentry id="sentry3" name="denied">
-          <ifPart>
-            <condition><![CDATA[${assessmentResult == 'failed'}]]></condition>
-          </ifPart>
-        </sentry>
-        <sentry id="sentry4" name="approved">
+        <sentry id="sentry1" name="approved">
           <ifPart>
             <condition><![CDATA[${assessmentResult == 'passed'}]]></condition>
           </ifPart>
         </sentry>
+        <sentry id="sentry2" name="denied">
+          <ifPart>
+            <condition><![CDATA[${assessmentResult == 'failed'}]]></condition>
+          </ifPart>
+        </sentry>
+        <sentry id="sentry3">
+          <planItemOnPart id="sentryOnPart1" sourceRef="planItem3">
+            <standardEvent>complete</standardEvent>
+          </planItemOnPart>
+        </sentry>
+        <sentry id="sentry4">
+          <planItemOnPart id="sentryOnPart2" sourceRef="planItem4">
+            <standardEvent>complete</standardEvent>
+          </planItemOnPart>
+        </sentry>
+        <task id="approvalProcess" name="approval process" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;approved&quot;)}" flowable:resultVariableName="decision"></task>
+        <task id="denialProcess" name="denial process" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;denied&quot;)}" flowable:resultVariableName="decision"></task>
         <milestone id="approvalSentMS" name="approval sent"></milestone>
         <milestone id="denialSentMS" name="denial sent"></milestone>
-        <task id="sendDenialNotification" name="Sends denial notification" isBlocking="false" flowable:type="http" flowable:parallelInSameTransaction="true">
-          <extensionElements>
-            <flowable:field name="requestMethod">
-              <flowable:string><![CDATA[POST]]></flowable:string>
-            </flowable:field>
-            <flowable:field name="requestUrl">
-              <flowable:expression><![CDATA[http://localhost:3456/api/applications/${applicationId}/notifications]]></flowable:expression>
-            </flowable:field>
-            <flowable:field name="requestHeaders">
-              <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
-            </flowable:field>
-            <flowable:field name="requestBody">
-              <flowable:string><![CDATA[{"notice_type":"denied"}]]></flowable:string>
-            </flowable:field>
-          </extensionElements>
-        </task>
-        <processTask id="approvalProcess" name="approval process" flowable:fallbackToDefaultTenant="false">
-          <extensionElements>
-            <flowable:in source="applicationId" target="applicationId"></flowable:in>
-          </extensionElements>
-          <processRefExpression><![CDATA[integratedEnrollmentAndEligibilityApprovalProcess]]></processRefExpression>
-        </processTask>
       </stage>
       <stage id="assessSubmissionStage" name="assess stage" autoComplete="true">
         <planItem id="planItem8" name="energy program process" definitionRef="energySvc">
           <entryCriterion id="energySentry" sentryRef="sentry5"></entryCriterion>
         </planItem>
-        <planItem id="planItem9" name="healthcare program process" definitionRef="healthcareProcess">
+        <planItem id="planItem9" name="healthcare program process" definitionRef="healthcareSvc">
           <entryCriterion id="healthcareSentry" sentryRef="sentry6"></entryCriterion>
         </planItem>
-        <planItem id="planItem10" name="food program process" definitionRef="foodProcess">
+        <planItem id="planItem10" name="food program process" definitionRef="foodSvc">
           <entryCriterion id="foodSentry" sentryRef="sentry7"></entryCriterion>
         </planItem>
         <sentry id="sentry5" name="energySentry" flowable:triggerMode="onEvent">
@@ -114,36 +94,13 @@
           </ifPart>
         </sentry>
         <humanTask id="energySvc" name="energy program process" flowable:formFieldValidation="true"></humanTask>
-        <processTask id="healthcareProcess" name="healthcare program process" flowable:fallbackToDefaultTenant="false">
-          <extensionElements>
-            <flowable:in source="applicationId" target="applicationId"></flowable:in>
-            <flowable:in source="benefitProgramName" target="benefitProgramName"></flowable:in>
-            <flowable:in source="applicationIncome" target="monthly_income_in_cents"></flowable:in>
-            <flowable:in source="householdSize" target="household_size"></flowable:in>
-            <flowable:out source="eligibility_result"
-              sourceExpression="${eligibility_result == 'NotEligible' ? 'failed' : 'passed' }"
-              target="assessmentResult" ></flowable:out>
-          </extensionElements>
-          <processRefExpression><![CDATA[integratedEnrollmentAndEligibilityHealthcareProcess]]></processRefExpression>
-        </processTask>
-        <processTask id="foodProcess" name="food program process" flowable:fallbackToDefaultTenant="false">
-          <extensionElements>
-            <flowable:in source="applicationId" target="applicationId"></flowable:in>
-            <flowable:in source="benefitProgramName" target="benefitProgramName"></flowable:in>
-            <flowable:in source="applicationIncome" target="applicationIncome"></flowable:in>
-            <flowable:in source="householdSize" target="householdSize"></flowable:in>
-            <flowable:out source="eligibilityResponse" sourceExpression="${eligibilityResponse.eligibility_result}"
-              target="eligibilityResult" ></flowable:out>
-            <flowable:out source="sufficient_proof_of_income_response" sourceExpression="${sufficient_proof_of_income_response == 'is_sufficient' ? 'passed' : 'failed'}"
-              target="assessmentResult" ></flowable:out>
-          </extensionElements>
-          <processRefExpression><![CDATA[integratedEnrollmentAndEligibilityFoodProcess]]></processRefExpression>
-        </processTask>
+        <task id="healthcareSvc" name="healthcare program process" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;passed&quot;)}" flowable:resultVariableName="assessmentResult"></task>
+        <task id="foodSvc" name="food program process" isBlocking="false" flowable:type="java" flowable:expression="${someService.logMessage(&quot;passed&quot;)}" flowable:resultVariableName="assessmentResult"></task>
       </stage>
     </casePlanModel>
   </case>
   <cmmndi:CMMNDI>
-    <cmmndi:CMMNDiagram id="CMMNDiagram_ieeCMMN">
+    <cmmndi:CMMNDiagram id="CMMNDiagram_iee10">
       <cmmndi:CMMNShape id="CMMNShape_flexCase" cmmnElementRef="flexCase">
         <dc:Bounds height="456.99999999999994" width="713.0" x="24.793387648105238" y="49.58677529621042"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
@@ -165,35 +122,35 @@
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
       <cmmndi:CMMNShape id="CMMNShape_planItem3" cmmnElementRef="planItem3">
-        <dc:Bounds height="54.0" width="146.0" x="529.2525828480689" y="300.6206714303343"></dc:Bounds>
-        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
-      </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0" cmmnElementRef="sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0">
-        <dc:Bounds height="22.0" width="14.0" x="522.1474297463162" y="317.6650307603593"></dc:Bounds>
-        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
-      </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_planItem4" cmmnElementRef="planItem4">
-        <dc:Bounds height="54.0" width="146.0" x="529.2525828480689" y="368.2564748282183"></dc:Bounds>
-        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
-      </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_sid-93133357-5825-4664-9C1F-86F103301012" cmmnElementRef="sid-93133357-5825-4664-9C1F-86F103301012">
-        <dc:Bounds height="22.0" width="14.0" x="521.6731820940885" y="384.2564748282183"></dc:Bounds>
-        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
-      </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_planItem5" cmmnElementRef="planItem5">
-        <dc:Bounds height="57.0" width="143.0" x="352.52427667212146" y="366.7564748282183"></dc:Bounds>
-        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
-      </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_deniedResult" cmmnElementRef="deniedResult">
-        <dc:Bounds height="22.0" width="14.0" x="344.75159167384305" y="383.366710071945"></dc:Bounds>
-        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
-      </cmmndi:CMMNShape>
-      <cmmndi:CMMNShape id="CMMNShape_planItem6" cmmnElementRef="planItem6">
-        <dc:Bounds height="57.0" width="143.0" x="352.52427667212146" y="299.1206714303343"></dc:Bounds>
+        <dc:Bounds height="50.99999999999997" width="132.1962809568439" x="359.1430737036866" y="296.12289645950284"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
       <cmmndi:CMMNShape id="CMMNShape_approvedResult" cmmnElementRef="approvedResult">
-        <dc:Bounds height="22.0" width="14.0" x="344.6068034156295" y="327.4298946309172"></dc:Bounds>
+        <dc:Bounds height="22.0" width="14.0" x="351.1430737036866" y="320.12289645950284"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem4" cmmnElementRef="planItem4">
+        <dc:Bounds height="50.99999999999997" width="132.1962809568439" x="359.1430737036866" y="369.7564748282183"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_deniedResult" cmmnElementRef="deniedResult">
+        <dc:Bounds height="22.0" width="14.0" x="352.1430737036866" y="384.7564748282183"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem5" cmmnElementRef="planItem5">
+        <dc:Bounds height="53.99999999999997" width="145.99999999999994" x="530.2066123518948" y="294.62289645950284"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0" cmmnElementRef="sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0">
+        <dc:Bounds height="22.0" width="14.0" x="523.1014592501422" y="311.66725578952787"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_planItem6" cmmnElementRef="planItem6">
+        <dc:Bounds height="53.99999999999997" width="145.99999999999994" x="525.0" y="368.2564748282183"></dc:Bounds>
+        <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="CMMNShape_sid-93133357-5825-4664-9C1F-86F103301012" cmmnElementRef="sid-93133357-5825-4664-9C1F-86F103301012">
+        <dc:Bounds height="22.0" width="14.0" x="517.4205992460196" y="384.2564748282183"></dc:Bounds>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNShape>
       <cmmndi:CMMNShape id="CMMNShape_planItem11" cmmnElementRef="planItem11">
@@ -246,22 +203,22 @@
         <di:waypoint x="697.7537190403677" y="361.56293508582706"></di:waypoint>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNEdge>
-      <cmmndi:CMMNEdge id="CMMNEdge_sid-7EE07949-0514-480F-B3A1-15378F83FC1F" cmmnElementRef="sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0" targetCMMNElementRef="planItem6">
+      <cmmndi:CMMNEdge id="CMMNEdge_sid-7EE07949-0514-480F-B3A1-15378F83FC1F" cmmnElementRef="sid-076D2738-0845-4E7D-BEAB-B88ECDE391B0" targetCMMNElementRef="planItem3">
         <di:extension>
           <flowable:docker type="source" x="8.0" y="10.0"></flowable:docker>
-          <flowable:docker type="target" x="71.5" y="28.5"></flowable:docker>
+          <flowable:docker type="target" x="66.09814047842195" y="25.5"></flowable:docker>
         </di:extension>
-        <di:waypoint x="522.7835441886706" y="327.6619535891507"></di:waypoint>
-        <di:waypoint x="495.4742766721215" y="327.65053743071667"></di:waypoint>
+        <di:waypoint x="523.7375730723428" y="321.6641709780831"></di:waypoint>
+        <di:waypoint x="491.28935466053053" y="321.6505730557467"></di:waypoint>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNEdge>
-      <cmmndi:CMMNEdge id="CMMNEdge_sid-621BE83A-BA70-436D-AA34-EEF09CE51DC7" cmmnElementRef="sid-93133357-5825-4664-9C1F-86F103301012" targetCMMNElementRef="planItem5">
+      <cmmndi:CMMNEdge id="CMMNEdge_sid-621BE83A-BA70-436D-AA34-EEF09CE51DC7" cmmnElementRef="sid-93133357-5825-4664-9C1F-86F103301012" targetCMMNElementRef="planItem4">
         <di:extension>
           <flowable:docker type="source" x="8.0" y="10.0"></flowable:docker>
-          <flowable:docker type="target" x="71.5" y="28.500000000000004"></flowable:docker>
+          <flowable:docker type="target" x="66.09814047842195" y="25.5"></flowable:docker>
         </di:extension>
-        <di:waypoint x="522.2626552891695" y="394.32613489941457"></di:waypoint>
-        <di:waypoint x="495.47427667211565" y="394.57970492024407"></di:waypoint>
+        <di:waypoint x="518.0074938655812" y="394.32996239848734"></di:waypoint>
+        <di:waypoint x="491.28935466052786" y="394.59667700218597"></di:waypoint>
         <cmmndi:CMMNLabel></cmmndi:CMMNLabel>
       </cmmndi:CMMNEdge>
       <cmmndi:CMMNEdge id="CMMNEdge_sid-B543F716-26BC-4B7D-8B0F-642785D6257C" cmmnElementRef="planItem11" targetCMMNElementRef="sid-F4EFF538-C00A-4BCF-AAD5-3A58F3826778">

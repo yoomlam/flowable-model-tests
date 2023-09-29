@@ -20,7 +20,7 @@ private class CmmTestConfig {
 class CmmTest : FlowableSpringTestBase() {
 
     @Test
-    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn"])
     fun healthcareProgram() {
         runToCompletion(
             "Healthcare",
@@ -29,14 +29,14 @@ class CmmTest : FlowableSpringTestBase() {
                     "benefitProgramName" to "healthcare"
                 )
             ),
-            expectedStagePlanItems = listOf("applicationEntry", "healthcareSubmissionStage"),
+            expectedStagePlanItems = listOf("applicationEntryStage", "healthcareSubmissionStage"),
             expectedTaskPlanItems = listOf("assessApplications", "healthcareSvc", "varHandler"),
             expectedEventPlanItems = listOf("varEventLnr")
         )
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn"])
     fun energyProgram() {
         val eligibilityResponseValue = "Energy"
         runToCompletion(
@@ -49,14 +49,14 @@ class CmmTest : FlowableSpringTestBase() {
                     "eligibilityResponse" to eligibilityResponseValue
                 )
             ),
-            expectedStagePlanItems = listOf("applicationEntry", "energySubmissionStage"),
+            expectedStagePlanItems = listOf("applicationEntryStage", "energySubmissionStage"),
             expectedTaskPlanItems = listOf("assessApplications", "energySvc", "varHandler"),
             expectedEventPlanItems = listOf("varEventLnr")
         )
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn"])
     fun foodProgram() {
         runToCompletion(
             "Food",
@@ -65,7 +65,7 @@ class CmmTest : FlowableSpringTestBase() {
                     "benefitProgramName" to "food"
                 )
             ),
-            expectedStagePlanItems = listOf("applicationEntry", "foodSubmissionStage"),
+            expectedStagePlanItems = listOf("applicationEntryStage", "foodSubmissionStage"),
             expectedTaskPlanItems = listOf("assessApplications", "foodSvc", "varHandler"),
             expectedEventPlanItems = listOf("foodMS", "varEventLnr"),
             expectedMilestones = listOf("food MS")
@@ -84,7 +84,7 @@ class CmmTest : FlowableSpringTestBase() {
         val caseInstance = startCmmCase("simpleCmmn", processVariables)
 
         assertCmmnPlanItems(8)
-        assertCmmnActiveStage(listOf("applicationEntry"))
+        assertCmmnActiveStage(listOf("applicationEntryStage"))
         val vars = getVars()
         assertEquals(1, vars.size)
 

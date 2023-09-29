@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
-  <process id="integratedEnrollmentAndEligibilityApprovalProcess" name="Integrated Enrollment and Eligibility-approvalProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
+  <process id="ieeApprovalProcess" name="Integrated Enrollment and Eligibility-approvalProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
     <sequenceFlow id="determinationMade" sourceRef="makeDetermination" targetRef="sendApprovalNotification"></sequenceFlow>
     <sequenceFlow id="approvalSent" sourceRef="sendApprovalNotification" targetRef="applicationProcessed"></sequenceFlow>
     <userTask id="makeDetermination" name="Makes determination" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
@@ -42,8 +42,8 @@
     <startEvent id="sid-5837C825-DD83-41CB-97B3-148F8F3C36A9" flowable:formFieldValidation="true"></startEvent>
     <sequenceFlow id="sid-AF3B35C0-311E-484E-84D6-E4DBBD3DEFA0" sourceRef="sid-5837C825-DD83-41CB-97B3-148F8F3C36A9" targetRef="makeDetermination"></sequenceFlow>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityApprovalProcess">
-    <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityApprovalProcess" id="BPMNPlane_integratedEnrollmentAndEligibilityApprovalProcess">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ieeApprovalProcess">
+    <bpmndi:BPMNPlane bpmnElement="ieeApprovalProcess" id="BPMNPlane_ieeApprovalProcess">
       <bpmndi:BPMNShape bpmnElement="makeDetermination" id="BPMNShape_makeDetermination">
         <omgdc:Bounds height="80.0" width="100.0" x="201.26709380194563" y="74.09161327475681"></omgdc:Bounds>
       </bpmndi:BPMNShape>
