@@ -3,8 +3,8 @@
   <process id="ieeApprovalProcess" name="Integrated Enrollment and Eligibility-approvalProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
     <sequenceFlow id="determinationMade" sourceRef="makeDetermination" targetRef="sendApprovalNotification"></sequenceFlow>
     <sequenceFlow id="approvalSent" sourceRef="sendApprovalNotification" targetRef="applicationProcessed"></sequenceFlow>
-    <userTask id="makeDetermination" name="Makes determination" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
-    <serviceTask id="sendApprovalNotification" name="Sends approval notification" flowable:parallelInSameTransaction="false" flowable:type="http">
+    <userTask id="makeDetermination" name="Make determination" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
+    <serviceTask id="sendApprovalNotification" name="Send approval notification" flowable:parallelInSameTransaction="false" flowable:type="http">
       <extensionElements>
         <flowable:field name="requestMethod">
           <flowable:string><![CDATA[POST]]></flowable:string>
@@ -38,7 +38,7 @@
         </flowable:field>
       </extensionElements>
     </serviceTask>
-    <endEvent id="applicationProcessed" name="Application processed"></endEvent>
+    <endEvent id="applicationProcessed"></endEvent>
     <startEvent id="sid-5837C825-DD83-41CB-97B3-148F8F3C36A9" flowable:formFieldValidation="true"></startEvent>
     <sequenceFlow id="sid-AF3B35C0-311E-484E-84D6-E4DBBD3DEFA0" sourceRef="sid-5837C825-DD83-41CB-97B3-148F8F3C36A9" targetRef="makeDetermination"></sequenceFlow>
   </process>

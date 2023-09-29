@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
   <process id="ieeHealthcareProgramProcess" name="Integrated Enrollment and Eligibility-healthcareProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
-    <startEvent id="healthcareApplicationSubmitted" name="Healthcare application submitted" flowable:initiator="initiator" flowable:formFieldValidation="true"></startEvent>
+    <startEvent id="healthcareApplicationSubmitted"></startEvent>
     <endEvent id="endEvent"></endEvent>
-    <serviceTask id="adultsDT" name="adultsDT" flowable:type="dmn">
+    <serviceTask id="adultsDT" name="Adults decision table" flowable:type="dmn">
       <extensionElements>
         <flowable:field name="decisionTableReferenceKey">
           <flowable:string><![CDATA[healthcareDecisionTableAdults]]></flowable:string>
@@ -19,7 +19,7 @@
         </flowable:field>
       </extensionElements>
     </serviceTask>
-    <serviceTask id="pregWomenDT" name="pregWomenDT" flowable:type="dmn">
+    <serviceTask id="pregWomenDT" name="Pregnant Women decision table" flowable:type="dmn">
       <extensionElements>
         <flowable:field name="decisionTableReferenceKey">
           <flowable:string><![CDATA[healthcareDecisionTablePregWomen]]></flowable:string>
@@ -40,7 +40,7 @@
     <sequenceFlow id="toAdultsDT" sourceRef="splitGW" targetRef="adultsDT"></sequenceFlow>
     <parallelGateway id="joinGW"></parallelGateway>
     <sequenceFlow id="fromAdultsDT" sourceRef="adultsDT" targetRef="joinGW"></sequenceFlow>
-    <serviceTask id="eligibilityDecisionTable" name="eligibilityDecisionTable" flowable:type="dmn">
+    <serviceTask id="eligibilityDecisionTable" name="Eligibility decision table" flowable:type="dmn">
       <extensionElements>
         <flowable:field name="decisionTableReferenceKey">
           <flowable:string><![CDATA[eligibilityDecisionTable]]></flowable:string>
@@ -58,7 +58,7 @@
     </serviceTask>
     <sequenceFlow id="toEligDT" sourceRef="joinGW" targetRef="eligibilityDecisionTable"></sequenceFlow>
     <sequenceFlow id="withEligibilityResult" sourceRef="eligibilityDecisionTable" targetRef="endEvent"></sequenceFlow>
-    <serviceTask id="childrenDT" name="childrenDT" flowable:type="dmn">
+    <serviceTask id="childrenDT" name="Children decision table" flowable:type="dmn">
       <extensionElements>
         <flowable:field name="decisionTableReferenceKey">
           <flowable:string><![CDATA[healthcareDecisionTableChildren]]></flowable:string>

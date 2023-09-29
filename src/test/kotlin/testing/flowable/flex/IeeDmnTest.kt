@@ -149,7 +149,7 @@ class IeeDmnTest : FlowableSpringTestBase() {
     }
 
     private fun checkExpectations() {
-        assertEquals(7, getVars().size)
+        assertEquals(6, getVars().size)
         assertProcessesComplete()
 
         val activityIds = getActivitiesOccurred().map { it.activityId }

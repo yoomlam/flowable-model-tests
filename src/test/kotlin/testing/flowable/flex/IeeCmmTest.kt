@@ -90,11 +90,11 @@ class IeeCmmTest : FlowableSpringTestBase() {
         runToCompletion(
             "passed",
             userTasks = listOf(
-                TaskOutput("assessApplications", outputMap = mapOf("benefitProgramName" to "healthcare")),
+                TaskOutput("verifySubmission", outputMap = mapOf("benefitProgramName" to "healthcare")),
                 TaskOutput("makeDetermination", ModelType.CMM, outputMap = mapOf())
             ),
             expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
-            expectedTaskPlanItems = listOf("assessApplications", "healthcareProcess", "approvalProcess"),
+            expectedTaskPlanItems = listOf("verifySubmission", "healthcareProcess", "approvalProcess"),
             expectedEventPlanItems = listOf("approvalSentMS"),
             expectedMilestones = listOf("approval sent")
         )
@@ -109,12 +109,12 @@ class IeeCmmTest : FlowableSpringTestBase() {
         runToCompletion(
             assessmentResultValue,
             userTasks = listOf(
-                TaskOutput("assessApplications", outputMap = mapOf("benefitProgramName" to "energy")),
+                TaskOutput("verifySubmission", outputMap = mapOf("benefitProgramName" to "energy")),
                 TaskOutput("energySvc", outputMap = mapOf("assessmentResult" to assessmentResultValue)),
                 TaskOutput("makeDetermination", ModelType.CMM, outputMap = mapOf())
             ),
             expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
-            expectedTaskPlanItems = listOf("assessApplications", "energySvc", "approvalProcess"),
+            expectedTaskPlanItems = listOf("verifySubmission", "energySvc", "approvalProcess"),
             expectedEventPlanItems = listOf("approvalSentMS"),
             expectedMilestones = listOf("approval sent")
         )
@@ -129,11 +129,11 @@ class IeeCmmTest : FlowableSpringTestBase() {
         runToCompletion(
             assessmentResultValue,
             userTasks = listOf(
-                TaskOutput("assessApplications", outputMap = mapOf("benefitProgramName" to "energy")),
+                TaskOutput("verifySubmission", outputMap = mapOf("benefitProgramName" to "energy")),
                 TaskOutput("energySvc", outputMap = mapOf("assessmentResult" to assessmentResultValue))
             ),
             expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
-            expectedTaskPlanItems = listOf("assessApplications", "energySvc", "sendDenialNotification"),
+            expectedTaskPlanItems = listOf("verifySubmission", "energySvc", "sendDenialNotification"),
             expectedEventPlanItems = listOf("denialSentMS"),
             expectedMilestones = listOf("denial sent")
         )
@@ -152,7 +152,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
         runToCompletion(
             "passed",
             userTasks = listOf(
-                TaskOutput("assessApplications", outputMap = mapOf("benefitProgramName" to "food")),
+                TaskOutput("verifySubmission", outputMap = mapOf("benefitProgramName" to "food")),
                 TaskOutput(
                     "verifyIncome",
                     ModelType.CMM,
@@ -161,7 +161,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
                 TaskOutput("makeDetermination", ModelType.CMM, mapOf())
             ),
             expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
-            expectedTaskPlanItems = listOf("assessApplications", "foodProcess", "approvalProcess"),
+            expectedTaskPlanItems = listOf("verifySubmission", "foodProcess", "approvalProcess"),
             expectedEventPlanItems = listOf("approvalSentMS"),
             expectedMilestones = listOf("approval sent")
         )
@@ -180,7 +180,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
         runToCompletion(
             "failed",
             userTasks = listOf(
-                TaskOutput("assessApplications", ModelType.BPM, mapOf("benefitProgramName" to "food")),
+                TaskOutput("verifySubmission", ModelType.BPM, mapOf("benefitProgramName" to "food")),
                 TaskOutput(
                     "verifyIncome",
                     ModelType.CMM,
@@ -188,7 +188,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
                 )
             ),
             expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
-            expectedTaskPlanItems = listOf("assessApplications", "foodProcess", "sendDenialNotification"),
+            expectedTaskPlanItems = listOf("verifySubmission", "foodProcess", "sendDenialNotification"),
             expectedEventPlanItems = listOf("denialSentMS"),
             expectedMilestones = listOf("denial sent")
         )

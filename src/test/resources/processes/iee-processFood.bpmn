@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
   <process id="ieeFoodProgramProcess" name="Integrated Enrollment and Eligibility-foodProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
-    <userTask id="verifyIncome" name="Verifies income" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
-    <serviceTask id="checkFoodEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
+    <userTask id="verifyIncome" name="Verify income" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
+    <serviceTask id="checkFoodEligibility" name="Check eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
       <extensionElements>
         <flowable:field name="requestMethod">
           <flowable:string><![CDATA[POST]]></flowable:string>
@@ -40,7 +40,7 @@
       </extensionElements>
     </serviceTask>
     <exclusiveGateway id="foodResultGW" default="whenUnknownFoodResult"></exclusiveGateway>
-    <startEvent id="applicationSubmitted" name="Application submitted" flowable:initiator="initiator" flowable:formFieldValidation="true"></startEvent>
+    <startEvent id="applicationSubmitted"></startEvent>
     <sequenceFlow id="withFoodApiResponse" sourceRef="checkFoodEligibility" targetRef="foodResultGW"></sequenceFlow>
     <sequenceFlow id="whenFoodEligible" name="Eligible" sourceRef="foodResultGW" targetRef="verifyIncome">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'Eligible'}]]></conditionExpression>
@@ -49,8 +49,8 @@
     <endEvent id="sid-12770376-4C49-431F-840F-EFFACA6C81F1">
       <errorEventDefinition errorRef="UNK_RESP" flowable:errorVariableLocalScope="true" flowable:errorVariableTransient="true"></errorEventDefinition>
     </endEvent>
-    <sequenceFlow id="whenUnknownFoodResult" name="Unknown eligibility result" sourceRef="foodResultGW" targetRef="sid-12770376-4C49-431F-840F-EFFACA6C81F1"></sequenceFlow>
-    <sequenceFlow id="whenFoodProgram" name="Food" sourceRef="applicationSubmitted" targetRef="checkFoodEligibility">
+    <sequenceFlow id="whenUnknownFoodResult" name="Unknown result" sourceRef="foodResultGW" targetRef="sid-12770376-4C49-431F-840F-EFFACA6C81F1"></sequenceFlow>
+    <sequenceFlow id="whenFoodProgram" name="whenFoodProgram" sourceRef="applicationSubmitted" targetRef="checkFoodEligibility">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${benefitProgramName == 'food'}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="whenNotFoodEligible" name="Not eligible" sourceRef="foodResultGW" targetRef="sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B">
