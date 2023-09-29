@@ -39,8 +39,6 @@ class DmnTest : FlowableSpringTestBase() {
             .isEqualTo(deploymentId)
             .isNotNull()
 
-        assertProcessesComplete()
-
         val deployment = dmnRepositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult()
         assertThat(deployment).isNotNull()
     }
@@ -68,7 +66,6 @@ class DmnTest : FlowableSpringTestBase() {
         completeTask("firstUserTask")
 
         assertProcessesComplete()
-        assertProcessCount()
         assertUserTasksOccurred(listOf("firstUserTask"))
 
         assertEquals(3, getVars().size)

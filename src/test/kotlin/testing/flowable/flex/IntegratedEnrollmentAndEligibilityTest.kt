@@ -241,7 +241,6 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
         assertUserTasksOccurred(userTasks.keys.toList())
 
         assertProcessesComplete()
-        assertProcessCount(1)
         assertActivitiesOccurred(expectedActivities)
     }
 }

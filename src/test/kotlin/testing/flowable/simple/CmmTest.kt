@@ -1,4 +1,4 @@
-package testing.flowable.flex
+package testing.flowable.simple
 
 import org.flowable.cmmn.engine.test.CmmnDeployment
 import org.junit.jupiter.api.Test
@@ -8,17 +8,16 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import testing.flowable.FlowableSpringTestBase
 import testing.flowable.VarValueMap
-import testing.flowable.simple.TestService
 import kotlin.test.assertEquals
 
 @TestConfiguration
-private class IeeCmmConfig {
+private class CmmTestConfig {
     @Bean
     fun someService(): TestService = TestService("in ${this::class.simpleName}")
 }
 
-@Import(IeeCmmConfig::class)
-class IeeCmmTest : FlowableSpringTestBase() {
+@Import(CmmTestConfig::class)
+class CmmTest : FlowableSpringTestBase() {
     @Autowired
     lateinit var someService: TestService
 
@@ -28,8 +27,6 @@ class IeeCmmTest : FlowableSpringTestBase() {
 
     override fun defaultProcessVariables() = mapOf(
         "applicationId" to applicationId
-//        "assessmentResult" to "", // All sentries evaluate when vars modified to see if condition is ever true FIXME: have process output this
-//        "benefitProgramName" to ""
     )
 
     private fun runToCompletion(
@@ -41,7 +38,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
         expectedEventPlanItems: List<String>,
         expectedMilestones: List<String> = listOf()
     ) {
-        val caseInstance = startCmmCase("iee3", processVariables)
+        val caseInstance = startCmmCase("simpleCmmn", processVariables)
 
         assertCmmnPlanItems(8)
         assertCmmnActiveStage(listOf("applicationEntry"))
@@ -86,7 +83,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn.xml"])
     fun healthcareProgram() {
         val userTasks = linkedMapOf(
             "assessApplications" to taskOutputMap(
@@ -107,7 +104,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn.xml"])
     fun energyProgram() {
         val eligibilityResponseValue = "Energy"
         val userTasks = linkedMapOf(
@@ -132,7 +129,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
     }
 
     @Test
-    @CmmnDeployment(resources = ["processes/integratedEnrollmentAndEligibility.cmmn.xml"])
+    @CmmnDeployment(resources = ["processes/simpleCaseManagement.cmmn.xml"])
     fun foodProgram() {
         val userTasks = linkedMapOf(
             "assessApplications" to taskOutputMap(
