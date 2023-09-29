@@ -21,13 +21,7 @@ class CmmTest : FlowableSpringTestBase() {
     @Autowired
     lateinit var someService: TestService
 
-    companion object {
-        const val applicationId = 20230919
-    }
-
-    override fun defaultProcessVariables() = mapOf(
-        "applicationId" to applicationId
-    )
+    override fun defaultProcessVariables(): VarValueMap = mapOf()
 
     private fun runToCompletion(
         eligibilityResponseValue: String,

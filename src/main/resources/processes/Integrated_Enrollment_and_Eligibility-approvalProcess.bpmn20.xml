@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <process id="integratedEnrollmentAndEligibilityApprovalProcess" name="Integrated Enrollment and Eligibility-approvalProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
+    <sequenceFlow id="determinationMade" sourceRef="makeDetermination" targetRef="sendApprovalNotification"></sequenceFlow>
+    <sequenceFlow id="approvalSent" sourceRef="sendApprovalNotification" targetRef="applicationProcessed"></sequenceFlow>
+    <userTask id="makeDetermination" name="Makes determination" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
+    <serviceTask id="sendApprovalNotification" name="Sends approval notification" flowable:parallelInSameTransaction="false" flowable:type="http">
+      <extensionElements>
+        <flowable:field name="requestMethod">
+          <flowable:string><![CDATA[POST]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestUrl">
+          <flowable:expression><![CDATA[http://localhost:3456/api/applications/${applicationId}/notifications]]></flowable:expression>
+        </flowable:field>
+        <flowable:field name="requestHeaders">
+          <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestBody">
+          <flowable:expression><![CDATA[{"notice_type":"${var:exists(eligibilityResponse) && (eligibilityResponse.eligibility_result == 'PregnantWomen' || eligibilityResponse.eligibility_result == 'ChildrenUnder19') ? 'mixed' : 'approved'}"}]]></flowable:expression>
+        </flowable:field>
+        <flowable:field name="disallowRedirects">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="ignoreException">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveRequestVariables">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParameters">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParametersTransient">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseVariableAsJson">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+    <endEvent id="applicationProcessed" name="Application processed"></endEvent>
+    <startEvent id="sid-5837C825-DD83-41CB-97B3-148F8F3C36A9" flowable:formFieldValidation="true"></startEvent>
+    <sequenceFlow id="sid-AF3B35C0-311E-484E-84D6-E4DBBD3DEFA0" sourceRef="sid-5837C825-DD83-41CB-97B3-148F8F3C36A9" targetRef="makeDetermination"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityApprovalProcess">
+    <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityApprovalProcess" id="BPMNPlane_integratedEnrollmentAndEligibilityApprovalProcess">
+      <bpmndi:BPMNShape bpmnElement="makeDetermination" id="BPMNShape_makeDetermination">
+        <omgdc:Bounds height="80.0" width="100.0" x="201.26709380194563" y="74.09161327475681"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sendApprovalNotification" id="BPMNShape_sendApprovalNotification">
+        <omgdc:Bounds height="81.4140625" width="134.12818523349415" x="380.0" y="74.09161327475681"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="applicationProcessed" id="BPMNShape_applicationProcessed">
+        <omgdc:Bounds height="28.0" width="28.0" x="608.2670938019456" y="100.09161327475681"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-5837C825-DD83-41CB-97B3-148F8F3C36A9" id="BPMNShape_sid-5837C825-DD83-41CB-97B3-148F8F3C36A9">
+        <omgdc:Bounds height="30.0" width="30.0" x="74.09161327475681" y="99.09161327475681"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sid-AF3B35C0-311E-484E-84D6-E4DBBD3DEFA0" id="BPMNEdge_sid-AF3B35C0-311E-484E-84D6-E4DBBD3DEFA0" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="104.04161257983861" y="114.09161327475681"></omgdi:waypoint>
+        <omgdi:waypoint x="201.26709380190186" y="114.09161327475681"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="approvalSent" id="BPMNEdge_approvalSent" flowable:sourceDockerX="67.06409261674708" flowable:sourceDockerY="40.70703125" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="514.0781852334895" y="114.5280075555715"></omgdi:waypoint>
+        <omgdi:waypoint x="608.2672013587038" y="114.1479083753741"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="determinationMade" id="BPMNEdge_determinationMade" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="67.06409261674708" flowable:targetDockerY="40.70703125">
+        <omgdi:waypoint x="301.2170938019457" y="114.27198483893439"></omgdi:waypoint>
+        <omgdi:waypoint x="379.99999999999625" y="114.55647324777117"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

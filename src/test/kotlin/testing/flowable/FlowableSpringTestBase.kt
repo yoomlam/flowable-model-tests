@@ -107,13 +107,24 @@ abstract class FlowableSpringTestBase {
 
     // Variables going into the process from the startEvent
     // https://github.com/navapbc/benefit-delivery-systems/blob/cdb23eb1f02a0f367cfc864ff89505dfce36e217/portal/src/pages/api/applications/index.ts#L40
-    open fun defaultProcessVariables() = mapOf<String, Any>()
+    open fun defaultProcessVariables(): VarValueMap = mapOf()
 
     // Convenience method to set additional process variables and override the default ones
     fun processVariables(vararg pairs: VarValuePair) = defaultProcessVariables() + pairs
 
     // Convenience method to create correctly-typed map of output variable values from tasks, i.e., UserTasks
     fun taskOutputMap(vararg pairs: VarValuePair) = mapOf(*pairs)
+
+    enum class ModelType { BPM, CMM }
+
+    data class TaskOutput(
+        val taskKey: String,
+        val modelType: ModelType = ModelType.BPM,
+        val outputMap: VarValueMap = mapOf()
+    )
+
+    fun userTaskOutputPair(modelType: ModelType = ModelType.BPM, vararg pairs: VarValuePair) =
+        Pair(modelType, taskOutputMap(*pairs))
 
     fun startProcess(key: String, processVariables: VarValueMap = mapOf()): ProcessInstance =
         runtimeService.startProcessInstanceByKey(key, processVariables)

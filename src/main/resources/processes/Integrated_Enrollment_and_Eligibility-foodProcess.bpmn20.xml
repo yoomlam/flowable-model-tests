@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <process id="integratedEnrollmentAndEligibilityFoodProcess" name="Integrated Enrollment and Eligibility-foodProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
+    <userTask id="verifyIncome" name="Verifies income" flowable:dueDate="P5D" flowable:formFieldValidation="true"></userTask>
+    <serviceTask id="checkFoodEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
+      <extensionElements>
+        <flowable:field name="requestMethod">
+          <flowable:string><![CDATA[POST]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestUrl">
+          <flowable:string><![CDATA[http://localhost:3456/api/eligibility/food]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestHeaders">
+          <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestBody">
+          <flowable:expression><![CDATA[{"monthly_income_in_cents":${applicationIncome},"household_size":${householdSize}}]]></flowable:expression>
+        </flowable:field>
+        <flowable:field name="disallowRedirects">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="responseVariableName">
+          <flowable:string><![CDATA[eligibilityResponse]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="ignoreException">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveRequestVariables">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParameters">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParametersTransient">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseVariableAsJson">
+          <flowable:string><![CDATA[true]]></flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="foodResultGW" default="whenUnknownFoodResult"></exclusiveGateway>
+    <startEvent id="applicationSubmitted" name="Application submitted" flowable:initiator="initiator" flowable:formFieldValidation="true"></startEvent>
+    <sequenceFlow id="withFoodApiResponse" sourceRef="checkFoodEligibility" targetRef="foodResultGW"></sequenceFlow>
+    <sequenceFlow id="whenFoodEligible" name="Eligible" sourceRef="foodResultGW" targetRef="verifyIncome">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'Eligible'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B"></endEvent>
+    <endEvent id="sid-12770376-4C49-431F-840F-EFFACA6C81F1">
+      <errorEventDefinition errorRef="UNK_RESP" flowable:errorVariableLocalScope="true" flowable:errorVariableTransient="true"></errorEventDefinition>
+    </endEvent>
+    <sequenceFlow id="whenUnknownFoodResult" name="Unknown eligibility result" sourceRef="foodResultGW" targetRef="sid-12770376-4C49-431F-840F-EFFACA6C81F1"></sequenceFlow>
+    <sequenceFlow id="whenFoodProgram" name="Food" sourceRef="applicationSubmitted" targetRef="checkFoodEligibility">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${benefitProgramName == 'food'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="whenNotFoodEligible" name="Not eligible" sourceRef="foodResultGW" targetRef="sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'NotEligible'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="withIncomeVerification" sourceRef="verifyIncome" targetRef="sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityFoodProcess">
+    <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityFoodProcess" id="BPMNPlane_integratedEnrollmentAndEligibilityFoodProcess">
+      <bpmndi:BPMNShape bpmnElement="verifyIncome" id="BPMNShape_verifyIncome">
+        <omgdc:Bounds height="80.0" width="100.0" x="690.0" y="120.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="checkFoodEligibility" id="BPMNShape_checkFoodEligibility">
+        <omgdc:Bounds height="80.0" width="100.0" x="405.0" y="229.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="foodResultGW" id="BPMNShape_foodResultGW">
+        <omgdc:Bounds height="40.0" width="40.0" x="570.0" y="249.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="applicationSubmitted" id="BPMNShape_applicationSubmitted">
+        <omgdc:Bounds height="30.0" width="30.0" x="255.0" y="254.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B" id="BPMNShape_sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B">
+        <omgdc:Bounds height="28.0" width="28.0" x="855.0" y="255.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-12770376-4C49-431F-840F-EFFACA6C81F1" id="BPMNShape_sid-12770376-4C49-431F-840F-EFFACA6C81F1">
+        <omgdc:Bounds height="28.0" width="28.0" x="726.0" y="375.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="withFoodApiResponse" id="BPMNEdge_withFoodApiResponse" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="504.95000000000005" y="269.0"></omgdi:waypoint>
+        <omgdi:waypoint x="570.0" y="269.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="whenFoodEligible" id="BPMNEdge_whenFoodEligible" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="601.554054054054" y="260.58301158301157"></omgdi:waypoint>
+        <omgdi:waypoint x="690.0" y="196.29700000000003"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="whenFoodProgram" id="BPMNEdge_whenFoodProgram" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="284.94999946593475" y="269.0"></omgdi:waypoint>
+        <omgdi:waypoint x="405.0" y="269.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="whenNotFoodEligible" id="BPMNEdge_whenNotFoodEligible" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="609.9464260120211" y="269.0"></omgdi:waypoint>
+        <omgdi:waypoint x="855.0" y="269.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="withIncomeVerification" id="BPMNEdge_withIncomeVerification" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="787.2769142595139" y="199.95"></omgdi:waypoint>
+        <omgdi:waypoint x="858.3025716311311" y="259.96404981162254"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="whenUnknownFoodResult" id="BPMNEdge_whenUnknownFoodResult" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="601.0829229914846" y="277.8666666666666"></omgdi:waypoint>
+        <omgdi:waypoint x="729.0629126544675" y="380.25394980792487"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

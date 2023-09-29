@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <process id="integratedEnrollmentAndEligibilityHealthcareProcess" name="Integrated Enrollment and Eligibility-healthcareProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
+    <serviceTask id="checkHealthcareEligibility" name="Checks eligibility" flowable:parallelInSameTransaction="false" flowable:type="http">
+      <extensionElements>
+        <flowable:field name="requestMethod">
+          <flowable:string><![CDATA[POST]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestUrl">
+          <flowable:string><![CDATA[http://localhost:3456/api/eligibility/healthcare]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestHeaders">
+          <flowable:string><![CDATA[Content-Type: application/json]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="requestBody">
+          <flowable:expression><![CDATA[{"monthly_income_in_cents":${applicationIncome},"household_size":${householdSize}}]]></flowable:expression>
+        </flowable:field>
+        <flowable:field name="disallowRedirects">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="responseVariableName">
+          <flowable:string><![CDATA[eligibilityResponse]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="ignoreException">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveRequestVariables">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParameters">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseParametersTransient">
+          <flowable:string><![CDATA[false]]></flowable:string>
+        </flowable:field>
+        <flowable:field name="saveResponseVariableAsJson">
+          <flowable:string><![CDATA[true]]></flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+    <startEvent id="healthcareApplicationSubmitted" name="Healthcare application submitted" flowable:initiator="initiator" flowable:formFieldValidation="true"></startEvent>
+    <sequenceFlow id="withApplication" sourceRef="healthcareApplicationSubmitted" targetRef="checkHealthcareEligibility"></sequenceFlow>
+    <endEvent id="sid-EB16787F-8621-4579-9E3A-0C7511B72161"></endEvent>
+    <sequenceFlow id="withHealthcareApiResponse" sourceRef="checkHealthcareEligibility" targetRef="sid-EB16787F-8621-4579-9E3A-0C7511B72161"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_integratedEnrollmentAndEligibilityHealthcareProcess">
+    <bpmndi:BPMNPlane bpmnElement="integratedEnrollmentAndEligibilityHealthcareProcess" id="BPMNPlane_integratedEnrollmentAndEligibilityHealthcareProcess">
+      <bpmndi:BPMNShape bpmnElement="checkHealthcareEligibility" id="BPMNShape_checkHealthcareEligibility">
+        <omgdc:Bounds height="80.0" width="100.0" x="565.0" y="42.599999999999966"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="healthcareApplicationSubmitted" id="BPMNShape_healthcareApplicationSubmitted">
+        <omgdc:Bounds height="30.0" width="30.0" x="420.0" y="67.59999999999997"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-EB16787F-8621-4579-9E3A-0C7511B72161" id="BPMNShape_sid-EB16787F-8621-4579-9E3A-0C7511B72161">
+        <omgdc:Bounds height="28.0" width="28.0" x="735.0" y="68.59999999999997"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="withApplication" id="BPMNEdge_withApplication" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="449.949999435861" y="82.59999999999997"></omgdi:waypoint>
+        <omgdi:waypoint x="565.0" y="82.59999999999997"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="withHealthcareApiResponse" id="BPMNEdge_withHealthcareApiResponse" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="664.9499999999999" y="82.59999999999997"></omgdi:waypoint>
+        <omgdi:waypoint x="735.0" y="82.59999999999997"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
