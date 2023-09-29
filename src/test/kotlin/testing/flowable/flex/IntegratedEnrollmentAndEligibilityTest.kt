@@ -89,7 +89,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForHealthcare() {
         stubResponses(healthcareEligibilityResult = "Eligible")
-        val processVariables = processVariables("benefitProgramName" to "healthcare")
+        val processVariables = addProcessVariables("benefitProgramName" to "healthcare")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
@@ -108,7 +108,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun notEligibleForHealthcare() {
         stubResponses(healthcareEligibilityResult = "NotEligible")
-        val processVariables = processVariables("benefitProgramName" to "healthcare")
+        val processVariables = addProcessVariables("benefitProgramName" to "healthcare")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
@@ -121,7 +121,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun whenUnknownHealthcareResult() {
         stubResponses(healthcareEligibilityResult = "some unknown response from eligibility API")
-        val processVariables = processVariables("benefitProgramName" to "healthcare")
+        val processVariables = addProcessVariables("benefitProgramName" to "healthcare")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenHealthcareProgram", "checkHealthcareEligibility", "withHealthcareApiResponse", "healthcareResultGW",
@@ -134,7 +134,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForEnergy() {
         stubResponses()
-        val processVariables = processVariables("benefitProgramName" to "energy")
+        val processVariables = addProcessVariables("benefitProgramName" to "energy")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenEnergyProgram", "makeDetermination", "determinationMade", "sendApprovalNotification", "approvalSent", "applicationProcessed"
@@ -146,14 +146,14 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun notEligibleForEnergy() {
-        // TODO: No such path when benefitProgramName = energy
+        // No such path when benefitProgramName = energy
     }
 
     @Test
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForFoodAndIncomeVerified() {
         stubResponses(foodEligibilityResult = "Eligible")
-        val processVariables = processVariables("benefitProgramName" to "food")
+        val processVariables = addProcessVariables("benefitProgramName" to "food")
         val expectedActivities = listOf(
             "applicationSubmitted",
             "withApplication", "programTypeGW",
@@ -172,7 +172,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForFoodButIncomeNotVerified() {
         stubResponses(foodEligibilityResult = "Eligible")
-        val processVariables = processVariables("benefitProgramName" to "food")
+        val processVariables = addProcessVariables("benefitProgramName" to "food")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
@@ -191,7 +191,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun eligibleForFoodButUnknownIncomeVerificationResult() {
         stubResponses(foodEligibilityResult = "Eligible")
-        val processVariables = processVariables("benefitProgramName" to "food")
+        val processVariables = addProcessVariables("benefitProgramName" to "food")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
@@ -208,7 +208,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun notEligibleForFood() {
         stubResponses(foodEligibilityResult = "NotEligible")
-        val processVariables = processVariables("benefitProgramName" to "food")
+        val processVariables = addProcessVariables("benefitProgramName" to "food")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",
@@ -221,7 +221,7 @@ class IntegratedEnrollmentAndEligibilityTest : FlowableSpringTestBase() {
     @Deployment(resources = ["processes/integratedEnrollmentAndEligibility_LOCALHOST.bpmn"])
     fun whenUnknownFoodResult() {
         stubResponses(foodEligibilityResult = "some unknown response from eligibility API")
-        val processVariables = processVariables("benefitProgramName" to "food")
+        val processVariables = addProcessVariables("benefitProgramName" to "food")
         val expectedActivities = listOf(
             "applicationSubmitted", "withApplication", "programTypeGW",
             "whenFoodProgram", "checkFoodEligibility", "withFoodApiResponse", "foodResultGW",

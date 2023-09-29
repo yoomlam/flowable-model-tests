@@ -91,7 +91,7 @@ abstract class FlowableSpringTestBase : FlowableSpringCmmnTestBase() {
     open fun defaultProcessVariables(): VarValueMap = mapOf()
 
     // Convenience method to set additional process variables and override the default ones
-    fun processVariables(vararg pairs: VarValuePair) = defaultProcessVariables() + pairs
+    fun addProcessVariables(vararg pairs: VarValuePair) = defaultProcessVariables() + pairs
 
     // Convenience method to create correctly-typed map of output variable values from tasks, i.e., UserTasks
     fun taskOutputMap(vararg pairs: VarValuePair) = mapOf(*pairs)
@@ -122,7 +122,9 @@ abstract class FlowableSpringTestBase : FlowableSpringCmmnTestBase() {
 
     // If process is complete, runtimeService.createVariableInstanceQuery() returns empty
     fun getVars(): MutableList<HistoricVariableInstance> =
-        historyService.createHistoricVariableInstanceQuery().list()
+        historyService.createHistoricVariableInstanceQuery().list().apply {
+            log.info { this.joinToString(prefix = "  vars: ") { "${it.variableName} = ${it.value}" } }
+        }
 
     // Convenience assertions
 
@@ -158,7 +160,10 @@ abstract class FlowableSpringTestBase : FlowableSpringCmmnTestBase() {
 
     // Activities include tasks and sequence flows
     fun getActivitiesOccurred(): MutableList<HistoricActivityInstance> =
-        historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime().asc().list()
+        historyService.createHistoricActivityInstanceQuery().orderByHistoricActivityInstanceStartTime()
+            .asc().list().apply {
+                log.info { this.joinToString(prefix = "  activities: ") { it.activityId } }
+            }
 
     fun assertActivitiesOccurred(expectedActivityIds: List<String>) =
         getActivitiesOccurred().apply {

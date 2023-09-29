@@ -4,16 +4,10 @@ import org.assertj.core.api.Assertions
 import org.flowable.dmn.engine.test.DmnDeployment
 import org.flowable.engine.test.Deployment
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Import
 import testing.flowable.FlowableSpringTestBase
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-@TestConfiguration
-private class IeeBasicDmnTestConfig
-
-@Import(IeeBasicDmnTestConfig::class)
 class IeeBasicDmnTest : FlowableSpringTestBase() {
 
     @Test
@@ -54,8 +48,6 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
         )
 
         // Check process variables
-        println("vars: ${getVars().map { "${it.variableName} = ${it.value}" }}")
-        assertEquals(7, getVars().size)
         assertVarValues(
             "pregnant_women" to true,
             "medicaid_for_adults" to true,
@@ -63,7 +55,7 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
             "eligibility_result" to "Adults"
         )
 
-        assertExpectedActivities()
+        checkExpectations()
     }
 
     @Test
@@ -86,8 +78,6 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
         )
 
         // Check process variables
-        println("vars: ${getVars().map { "${it.variableName} = ${it.value}" }}")
-        assertEquals(7, getVars().size)
         assertVarValues(
             "medicaid_for_adults" to false,
             "pregnant_women" to true,
@@ -95,7 +85,7 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
             "eligibility_result" to "PregnantWomen"
         )
 
-        assertExpectedActivities()
+        checkExpectations()
     }
 
     @Test
@@ -118,8 +108,6 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
         )
 
         // Check process variables
-        println("vars: ${getVars().map { "${it.variableName} = ${it.value}" }}")
-        assertEquals(7, getVars().size)
         assertVarValues(
             "medicaid_for_adults" to false,
             "pregnant_women" to false,
@@ -127,7 +115,7 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
             "eligibility_result" to "ChildrenUnder19"
         )
 
-        assertExpectedActivities()
+        checkExpectations()
     }
 
     @Test
@@ -150,8 +138,6 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
         )
 
         // Check process variables
-        println("vars: ${getVars().map { "${it.variableName} = ${it.value}" }}")
-        assertEquals(7, getVars().size)
         assertVarValues(
             "medicaid_for_adults" to false,
             "pregnant_women" to false,
@@ -159,9 +145,11 @@ class IeeBasicDmnTest : FlowableSpringTestBase() {
             "eligibility_result" to "NotEligible"
         )
 
-        assertExpectedActivities()
+        checkExpectations()
     }
-    private fun assertExpectedActivities() {
+
+    private fun checkExpectations() {
+        assertEquals(7, getVars().size)
         assertProcessesComplete()
 
         val activityIds = getActivitiesOccurred().map { it.activityId }

@@ -152,13 +152,17 @@ abstract class FlowableSpringCmmnTestBase {
             }
 
     // event-related items "occur", whereas stages/tasks "complete"
-    fun assertCmmnEventOccurred(eventPlanItemIds: List<String>): List<HistoricPlanItemInstance> {
+    fun assertCmmnEventOccurred(eventPlanItemIds: List<String>, inOrder: Boolean = true): List<HistoricPlanItemInstance> {
         val completeItems = cmmnHistoryService.createHistoricPlanItemInstanceQuery()
             .planItemInstanceState("completed").orderByOccurredTime().asc().list()
         // filter out non-event-related items (which don't have occurTime) and stage items
         return completeItems.filter { !it.isStage && it.occurredTime != null }.apply {
             val eventItemIds = map { it.planItemDefinitionId }
-            assertEquals(eventPlanItemIds, eventItemIds, "Occurred events")
+            if (inOrder) {
+                assertEquals(eventPlanItemIds, eventItemIds, "Occurred events")
+            } else {
+                assertEquals(eventPlanItemIds.sorted(), eventItemIds.sorted(), "Occurred events")
+            }
         }
     }
 

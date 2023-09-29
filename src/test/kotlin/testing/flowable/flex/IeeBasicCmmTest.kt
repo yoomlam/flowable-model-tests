@@ -2,7 +2,6 @@ package testing.flowable.flex
 
 import org.flowable.cmmn.engine.test.CmmnDeployment
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -13,21 +12,94 @@ import kotlin.test.assertEquals
 
 @TestConfiguration
 private class IeeBasicCmmConfig {
+    // `someService` is referenced in the CMM XML file
     @Bean
     fun someService(): TestService = TestService("in ${this::class.simpleName}")
 }
 
 @Import(IeeBasicCmmConfig::class)
 class IeeBasicCmmTest : FlowableSpringTestBase() {
-    @Autowired
-    lateinit var someService: TestService
 
-    override fun defaultProcessVariables(): VarValueMap = mapOf()
+    @Test
+    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    fun healthcareProgram() {
+        runToCompletion(
+            "passed",
+            userTasks = linkedMapOf(
+                "assessApplications" to taskOutputMap(
+                    "benefitProgramName" to "healthcare"
+                )
+            ),
+            expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
+            expectedTaskPlanItems = listOf("assessApplications", "healthcareSvc", "approvalProcess"),
+            expectedEventPlanItems = listOf("approvalSentMS"),
+            expectedMilestones = listOf("approval sent")
+        )
+    }
+
+    @Test
+    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    fun energyProgram() {
+        val assessmentResultValue = "passed"
+        runToCompletion(
+            assessmentResultValue,
+            userTasks = linkedMapOf(
+                "assessApplications" to taskOutputMap(
+                    "benefitProgramName" to "energy"
+                ),
+                "energySvc" to taskOutputMap(
+                    "assessmentResult" to assessmentResultValue
+                )
+            ),
+            expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
+            expectedTaskPlanItems = listOf("assessApplications", "energySvc", "approvalProcess"),
+            expectedEventPlanItems = listOf("approvalSentMS"),
+            expectedMilestones = listOf("approval sent")
+        )
+    }
+
+    @Test
+    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    fun energyProgramFailed() {
+        val assessmentResultValue = "failed"
+        runToCompletion(
+            assessmentResultValue,
+            userTasks = linkedMapOf(
+                "assessApplications" to taskOutputMap(
+                    "benefitProgramName" to "energy"
+                ),
+                "energySvc" to taskOutputMap(
+                    "assessmentResult" to assessmentResultValue
+                )
+            ),
+            expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
+            expectedTaskPlanItems = listOf("assessApplications", "energySvc", "denialProcess"),
+            expectedEventPlanItems = listOf("denialSentMS"),
+            expectedMilestones = listOf("denial sent")
+        )
+    }
+
+    @Test
+    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
+    fun foodProgram() {
+        runToCompletion(
+            "passed",
+            userTasks = linkedMapOf(
+                "assessApplications" to taskOutputMap(
+                    "benefitProgramName" to "food"
+                )
+            ),
+            expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
+            expectedTaskPlanItems = listOf("assessApplications", "foodSvc", "approvalProcess"),
+            expectedEventPlanItems = listOf("approvalSentMS"),
+            expectedMilestones = listOf("approval sent")
+        )
+    }
 
     private fun runToCompletion(
         assessmentResultValue: String,
-        processVariables: VarValueMap,
-        userTasks: LinkedHashMap<String, VarValueMap> = LinkedHashMap(),
+        processVariables: VarValueMap = defaultProcessVariables(),
+        userTasks: LinkedHashMap<String, VarValueMap>,
         expectedStagePlanItems: List<String>,
         expectedTaskPlanItems: List<String>,
         expectedEventPlanItems: List<String>,
@@ -37,9 +109,7 @@ class IeeBasicCmmTest : FlowableSpringTestBase() {
 
         assertCmmnPlanItems(4)
         assertCmmnActiveStage(listOf("submissionStage"))
-        val vars = getVars()
-        println("vars: ${vars.map { it.variableName }}")
-//        assertEquals(4, vars.size)
+        assertEquals(1, getVars().size)
 
         if (userTasks.isNotEmpty()) {
             // assert no milestones has occurred
@@ -56,9 +126,7 @@ class IeeBasicCmmTest : FlowableSpringTestBase() {
         // assert 0 active UserTasks since they've all been completed
         assertCmmnActiveUserTasks(caseInstance)
 
-        println("vars: ${getVars().map { it.variableName }}")
         assertVarEquals("assessmentResult", assessmentResultValue)
-//        assertVarEquals("assessmentResult", assessmentResultValue)
         assertCmmnMilestonesOccurred(expectedMilestones)
 
         // PlanItems executed as a result of UserTasks being completed
@@ -75,105 +143,5 @@ class IeeBasicCmmTest : FlowableSpringTestBase() {
         // What's a TaskLog? Why is it 0?
         val taskLog = cmmnHistoryService.createHistoricTaskLogEntryQuery().list()
         assertEquals(0, taskLog.size)
-    }
-
-    @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
-    fun healthcareProgram() {
-        val userTasks = linkedMapOf(
-            "assessApplications" to taskOutputMap(
-                "benefitProgramName" to "healthcare"
-            )
-        )
-        val stageItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage")
-        val taskItems = listOf("assessApplications", "healthcareSvc", "approvalProcess")
-        val eventItems = listOf("approvalSentMS")
-        val expectedMilestones = listOf("approval sent")
-        runToCompletion(
-            "passed",
-            defaultProcessVariables(),
-            userTasks,
-            stageItems,
-            taskItems,
-            eventItems,
-            expectedMilestones
-        )
-    }
-
-    @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
-    fun energyProgram() {
-        val assessmentResultValue = "passed"
-        val userTasks = linkedMapOf(
-            "assessApplications" to taskOutputMap(
-                "benefitProgramName" to "energy"
-            ),
-            "energySvc" to taskOutputMap(
-                "assessmentResult" to assessmentResultValue
-            )
-        )
-        val stageItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage")
-        val taskItems = listOf("assessApplications", "energySvc", "approvalProcess")
-        val eventItems = listOf("approvalSentMS")
-        val expectedMilestones = listOf("approval sent")
-        runToCompletion(
-            assessmentResultValue,
-            defaultProcessVariables(),
-            userTasks,
-            stageItems,
-            taskItems,
-            eventItems,
-            expectedMilestones
-        )
-    }
-
-    @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
-    fun energyProgramFailed() {
-        val assessmentResultValue = "failed"
-        val userTasks = linkedMapOf(
-            "assessApplications" to taskOutputMap(
-                "benefitProgramName" to "energy"
-            ),
-            "energySvc" to taskOutputMap(
-                "assessmentResult" to assessmentResultValue
-            )
-        )
-        val stageItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage")
-        val taskItems = listOf("assessApplications", "energySvc", "denialProcess")
-        val eventItems = listOf("denialSentMS")
-        val expectedMilestones = listOf("denial sent")
-        runToCompletion(
-            assessmentResultValue,
-            defaultProcessVariables(),
-            userTasks,
-            stageItems,
-            taskItems,
-            eventItems,
-            expectedMilestones
-        )
-    }
-
-    @Test
-    @CmmnDeployment(resources = ["processes/ieeBasic.cmmn.xml"])
-    fun foodProgram() {
-        val userTasks = linkedMapOf(
-            "assessApplications" to taskOutputMap(
-                "benefitProgramName" to "food"
-            )
-        )
-        val stageItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage")
-        val taskItems = listOf("assessApplications", "foodSvc", "approvalProcess")
-        val eventItems = listOf("approvalSentMS")
-        val expectedMilestones = listOf("approval sent")
-        runToCompletion(
-            "passed",
-            defaultProcessVariables(),
-            userTasks,
-            stageItems,
-            taskItems,
-            eventItems,
-            expectedMilestones
-        )
     }
 }

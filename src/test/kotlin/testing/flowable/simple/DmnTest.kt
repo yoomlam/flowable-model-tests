@@ -6,15 +6,9 @@ import org.flowable.dmn.engine.test.DmnDeploymentId
 import org.flowable.dmn.engine.test.FlowableDmnTestHelper
 import org.flowable.engine.test.Deployment
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Import
 import testing.flowable.FlowableSpringTestBase
 import kotlin.test.assertEquals
 
-@TestConfiguration
-private class DmnTestConfig
-
-@Import(DmnTestConfig::class)
 class DmnTest : FlowableSpringTestBase() {
 
     @Test
