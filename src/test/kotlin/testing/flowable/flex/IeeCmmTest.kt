@@ -207,7 +207,7 @@ class IeeCmmTest : FlowableSpringTestBase() {
 
         assertCmmnPlanItems(4)
         assertCmmnActiveStage(listOf("submissionStage"))
-        assertEquals(4, getVars().size)
+        assertEquals(3, getVars().size)
 
         if (userTasks.isNotEmpty()) {
             // assert no milestones has occurred

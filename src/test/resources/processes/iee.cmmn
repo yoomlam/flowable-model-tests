@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flowable="http://flowable.org/cmmn" xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI" xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC" xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI" targetNamespace="http://www.flowable.org/casedef" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
-  <case id="ieeCMMN" name="ieeCMMN" flowable:initiatorVariableName="initiator">
-    <casePlanModel id="flexCase" name="Flex case" flowable:formFieldValidation="true">
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/cmmn"
+             xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI"
+             xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC"
+             xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI"
+             targetNamespace="http://www.flowable.org/casedef"
+             exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <case id="ieeCMMN" name="ieeCMMN">
+    <casePlanModel id="flexCase" name="Flex case">
       <planItem id="planItemSubmissionST" name="submission stage" definitionRef="submissionStage"></planItem>
       <planItem id="planItemAssessST" name="assessment stage" definitionRef="assessSubmissionStage">
         <entryCriterion id="assessmentEntry" sentryRef="sentryAssessST"></entryCriterion>
