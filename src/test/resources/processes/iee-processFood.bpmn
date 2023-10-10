@@ -57,6 +57,20 @@
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${eligibilityResponse.eligibility_result == 'NotEligible'}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="withIncomeVerification" sourceRef="verifyIncome" targetRef="sid-2B7237E8-7D9F-4CB7-917B-BC447D6CC13B"></sequenceFlow>
+    <subProcess id="sid-9ABF554C-71C9-48F5-BAEC-AD015EFCF9AB" name="subProcess" triggeredByEvent="true">
+      <startEvent id="sid-C1936410-4DB2-405A-BC51-6C14D34B913F" isInterrupting="true">
+        <errorEventDefinition flowable:errorVariableLocalScope="true" flowable:errorVariableTransient="true"></errorEventDefinition>
+      </startEvent>
+      <scriptTask id="printUnknownReponseError" name="print error" scriptFormat="groovy" flowable:autoStoreVariables="true">
+        <script><![CDATA[String myMessage = "caught UnknownResponseError";
+println myMessage;
+execution.setVariable("sufficient_proof_of_income_response", "UnknownResponseError");
+]]></script>
+      </scriptTask>
+      <endEvent id="sid-BD16284A-47FD-422D-9835-95ADB1BAB3D1"></endEvent>
+      <sequenceFlow id="sid-A905826D-386C-416D-87BB-04AF7B5EDEC1" sourceRef="sid-C1936410-4DB2-405A-BC51-6C14D34B913F" targetRef="printUnknownReponseError"></sequenceFlow>
+      <sequenceFlow id="sid-74BA5799-F64C-4333-882C-C44E572ECDB5" sourceRef="printUnknownReponseError" targetRef="sid-BD16284A-47FD-422D-9835-95ADB1BAB3D1"></sequenceFlow>
+    </subProcess>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_ieeFoodProgramProcess">
     <bpmndi:BPMNPlane bpmnElement="ieeFoodProgramProcess" id="BPMNPlane_ieeFoodProgramProcess">
@@ -76,11 +90,31 @@
         <omgdc:Bounds height="28.0" width="28.0" x="855.0" y="255.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-12770376-4C49-431F-840F-EFFACA6C81F1" id="BPMNShape_sid-12770376-4C49-431F-840F-EFFACA6C81F1">
-        <omgdc:Bounds height="28.0" width="28.0" x="726.0" y="375.0"></omgdc:Bounds>
+        <omgdc:Bounds height="28.0" width="28.0" x="615.0" y="390.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-9ABF554C-71C9-48F5-BAEC-AD015EFCF9AB" id="BPMNShape_sid-9ABF554C-71C9-48F5-BAEC-AD015EFCF9AB">
+        <omgdc:Bounds height="107.0" width="304.0" x="600.0" y="450.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-C1936410-4DB2-405A-BC51-6C14D34B913F" id="BPMNShape_sid-C1936410-4DB2-405A-BC51-6C14D34B913F">
+        <omgdc:Bounds height="30.0" width="30.0" x="613.0" y="486.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="printUnknownReponseError" id="BPMNShape_printUnknownReponseError">
+        <omgdc:Bounds height="80.0" width="100.0" x="700.0" y="461.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-BD16284A-47FD-422D-9835-95ADB1BAB3D1" id="BPMNShape_sid-BD16284A-47FD-422D-9835-95ADB1BAB3D1">
+        <omgdc:Bounds height="28.0" width="28.0" x="845.0" y="487.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="withFoodApiResponse" id="BPMNEdge_withFoodApiResponse" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
         <omgdi:waypoint x="504.95000000000005" y="269.0"></omgdi:waypoint>
         <omgdi:waypoint x="570.0" y="269.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-74BA5799-F64C-4333-882C-C44E572ECDB5" id="BPMNEdge_sid-74BA5799-F64C-4333-882C-C44E572ECDB5" flowable:sourceDockerX="50.0" flowable:sourceDockerY="40.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="799.949999999934" y="501.0"></omgdi:waypoint>
+        <omgdi:waypoint x="845.0" y="501.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-A905826D-386C-416D-87BB-04AF7B5EDEC1" id="BPMNEdge_sid-A905826D-386C-416D-87BB-04AF7B5EDEC1" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
+        <omgdi:waypoint x="642.9499987722937" y="501.0"></omgdi:waypoint>
+        <omgdi:waypoint x="699.9999999999592" y="501.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="whenFoodEligible" id="BPMNEdge_whenFoodEligible" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="601.554054054054" y="260.58301158301157"></omgdi:waypoint>
@@ -99,8 +133,8 @@
         <omgdi:waypoint x="858.3025716311311" y="259.96404981162254"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="whenUnknownFoodResult" id="BPMNEdge_whenUnknownFoodResult" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
-        <omgdi:waypoint x="601.0829229914846" y="277.8666666666666"></omgdi:waypoint>
-        <omgdi:waypoint x="729.0629126544675" y="380.25394980792487"></omgdi:waypoint>
+        <omgdi:waypoint x="594.471551724138" y="284.4752871912694"></omgdi:waypoint>
+        <omgdi:waypoint x="625.1134354307674" y="390.5380369895167"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

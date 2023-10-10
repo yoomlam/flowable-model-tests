@@ -72,6 +72,9 @@ dependencies {
     // Needed for ServiceTasks with flowable:type="http"
     implementation "org.flowable:flowable-http:${flowable_ver}"
 
+    // Groovy script engine for Script task
+    implementation 'org.codehaus.groovy:groovy-all:3.0.19'
+
     // DB for Flowable engine
     implementation 'com.h2database:h2'
 

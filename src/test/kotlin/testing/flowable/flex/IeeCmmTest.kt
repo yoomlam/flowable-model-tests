@@ -194,6 +194,28 @@ class IeeCmmTest : FlowableSpringTestBase() {
         )
     }
 
+    @Test
+    @CmmnDeployment(resources = ["processes/iee.cmmn"])
+    @Deployment(
+        resources = [
+            "processes/iee-processFood.bpmn",
+            "processes/iee-processApproval.bpmn"
+        ]
+    )
+    fun foodProgramButError() {
+        stubResponses(foodEligibilityResult = "Some unexpected result")
+        runToCompletion(
+            "failed",
+            userTasks = listOf(
+                TaskOutput("verifySubmission", ModelType.BPM, mapOf("benefitProgramName" to "food")),
+            ),
+            expectedStagePlanItems = listOf("submissionStage", "assessSubmissionStage", "decisionStage"),
+            expectedTaskPlanItems = listOf("verifySubmission", "foodProcess", "sendDenialNotification"),
+            expectedEventPlanItems = listOf("denialSentMS"),
+            expectedMilestones = listOf("denial sent")
+        )
+    }
+
     private fun runToCompletion(
         assessmentResultValue: String,
         processVariables: VarValueMap = defaultProcessVariables(),
